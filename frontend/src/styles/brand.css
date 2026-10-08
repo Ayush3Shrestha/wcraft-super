@@ -1,0 +1,146 @@
+/*
+ * Welcome Craft brand styles from the Figma prototype: colours, fonts,
+ * section labels and buttons. Shared by the navbar, footer and the pages
+ * that use the new look (home.css, ...).
+ */
+
+:root {
+  --wc-maroon: #430a12;
+  --wc-maroon-soft: #5c1c24;
+  --wc-crimson: #890d20;
+  --wc-marigold: #f8d058;
+  --wc-gold: #e5c158;
+  --wc-gold-deep: #765c00;
+  --wc-gold-text: #8a6d12;
+  --wc-charcoal: #201c1c;
+  --wc-charcoal-soft: #343030;
+  --wc-cream: #ecdcc0;
+  --wc-cream-light: #f0e4d0;
+  --wc-paper: #f0e8dc;
+  --wc-ivory: #faf7f2;
+  --wc-stone: #f1ece4;
+  --wc-line: rgba(67, 10, 18, 0.1);
+  --wc-nav: #f3efe9;
+  --wc-ink: #2a1a17;
+  --wc-ink-muted: #6b5a52;
+  --wc-on-dark: #f0e8dc;
+  --wc-on-dark-muted: rgba(240, 232, 220, 0.72);
+
+  --wc-font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --wc-font-serif: "Playfair Display", Georgia, serif;
+}
+
+/* Small uppercase label above section titles */
+.wc-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--wc-font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--wc-gold-text);
+}
+.wc-on-dark .wc-eyebrow {
+  color: var(--wc-gold);
+}
+
+/* Buttons. Hover colours use two classes so they beat the global a:hover. */
+.wc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  font-family: var(--wc-font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+.wc-btn.wc-btn:hover {
+  text-decoration: none;
+}
+.wc-btn:focus-visible {
+  outline: 2px solid var(--wc-marigold);
+  outline-offset: 2px;
+}
+.wc-btn-primary,
+.wc-btn-primary.wc-btn-primary:hover {
+  color: var(--wc-marigold);
+}
+.wc-btn-primary {
+  background-color: var(--wc-maroon);
+}
+.wc-btn-primary:hover {
+  background-color: var(--wc-crimson);
+}
+.wc-btn-ghost,
+.wc-btn-ghost.wc-btn-ghost:hover {
+  color: var(--wc-on-dark);
+}
+.wc-btn-ghost {
+  background-color: rgba(240, 232, 220, 0.12);
+  border-color: rgba(240, 232, 220, 0.2);
+  backdrop-filter: blur(4px);
+}
+.wc-btn-ghost:hover {
+  background-color: rgba(240, 232, 220, 0.2);
+}
+.wc-btn-outline {
+  background-color: transparent;
+  color: var(--wc-maroon);
+  border-color: var(--wc-maroon);
+}
+.wc-btn-outline.wc-btn-outline:hover {
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+.wc-btn-gold,
+.wc-btn-gold.wc-btn-gold:hover {
+  color: #fff8e1;
+}
+.wc-btn-gold {
+  background-color: var(--wc-gold-deep);
+}
+.wc-btn-gold:hover {
+  background-color: #8c6e00;
+}
+.wc-btn-sm {
+  padding: 0.55rem 0.9rem;
+}
+
+/* Chat buttons in each app's own green */
+.wc-btn-whatsapp,
+.wc-btn-whatsapp.wc-btn-whatsapp:hover,
+.wc-btn-wechat,
+.wc-btn-wechat.wc-btn-wechat:hover {
+  color: #062b14;
+}
+.wc-btn-whatsapp,
+.wc-btn-wechat {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+.wc-btn-whatsapp {
+  background-color: #25d366;
+}
+.wc-btn-whatsapp.wc-btn-whatsapp:hover {
+  background-color: #1ebe5b;
+}
+.wc-btn-wechat {
+  background-color: #07c160;
+}
+.wc-btn-wechat.wc-btn-wechat:hover {
+  background-color: #06ad56;
+}
+.wc-btn-whatsapp:focus-visible,
+.wc-btn-wechat:focus-visible {
+  outline-color: var(--wc-maroon);
+}

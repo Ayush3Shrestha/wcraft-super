@@ -1,0 +1,532 @@
+/*
+ * Shared shop styles in the Figma prototype's look: page base (fonts,
+ * serif headings, italic accents), live price cards, product cards, tags,
+ * round icon buttons and the toast. Add the wc-page class to a page's root
+ * to use them. Tokens are in brand.css.
+ */
+
+.wc-page {
+  font-family: var(--wc-font-sans);
+  color: var(--wc-ink);
+  background-color: var(--wc-paper);
+}
+
+.wc-page h1,
+.wc-page h2,
+.wc-page h3,
+.wc-page .wc-serif {
+  font-family: var(--wc-font-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--wc-maroon);
+}
+
+/* Links take the colour of their surroundings (the site default is orange) */
+.wc-page h3 a,
+.wc-page .wc-category-card,
+.wc-page .wc-product-link {
+  color: inherit;
+}
+
+.wc-page .wc-category-card:hover,
+.wc-page .wc-product-link:hover,
+.wc-page .wc-icon-btn:hover {
+  text-decoration: none;
+}
+
+/* Dark sections (charcoal background, light text) */
+.wc-dark {
+  background-color: var(--wc-charcoal);
+  color: var(--wc-on-dark);
+}
+
+.wc-page .wc-dark h1,
+.wc-page .wc-dark h2,
+.wc-page .wc-dark h3 {
+  color: var(--wc-on-dark);
+}
+
+/* Italic accent words in headings: gold on dark, crimson on cream */
+.wc-page .wc-accent {
+  font-style: italic;
+  color: var(--wc-crimson);
+}
+
+.wc-page .wc-hero .wc-accent,
+.wc-page .wc-dark .wc-accent {
+  color: var(--wc-gold);
+}
+
+
+/* Live price cards (dark background) */
+.wc-price-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  background-color: rgba(52, 48, 48, 0.72);
+  border: 1px solid rgba(229, 193, 88, 0.28);
+  backdrop-filter: blur(6px);
+  color: var(--wc-on-dark);
+}
+
+.wc-price-card .wc-price-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wc-gold);
+}
+
+.wc-price-card .wc-price-value {
+  font-family: var(--wc-font-serif);
+  font-size: clamp(1.15rem, 1.6vw + 0.6rem, 1.35rem);
+  font-weight: 600;
+  line-height: 1.25;
+}
+/* Keep the amount and "/ tola" whole; they may wrap onto two lines */
+.wc-price-card .wc-price-value > span {
+  white-space: nowrap;
+}
+.wc-price-card .wc-price-unit {
+  font-family: var(--wc-font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--wc-on-dark-muted);
+}
+.wc-price-card .wc-price-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.wc-change-up {
+  color: #8fd18f;
+}
+
+.wc-change-down {
+  color: #ff9a8f;
+}
+
+
+/* =========================================================
+   Product cards
+   All cards now follow the fourth/crimson card design.
+   ========================================================= */
+
+.wc-product-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: var(--wc-crimson);
+  color: var(--wc-on-dark);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.wc-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px rgba(67, 10, 18, 0.18);
+}
+
+.wc-product-card .wc-product-photo {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background-color: var(--wc-charcoal);
+}
+
+.wc-product-card .wc-product-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.wc-product-card:hover .wc-product-photo img {
+  transform: scale(1.05);
+}
+
+.wc-product-card .wc-product-meta {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-marigold);
+}
+
+.wc-product-card h3 {
+  color: var(--wc-on-dark);
+}
+
+.wc-product-card .wc-product-price {
+  font-family: var(--wc-font-serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--wc-on-dark);
+}
+
+.wc-product-card .wc-product-link {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-on-dark);
+}
+
+.wc-product-card .wc-product-link:hover {
+  color: var(--wc-marigold);
+}
+
+/* Product description */
+.wc-product-card .wc-product-desc {
+  color: var(--wc-on-dark-muted);
+}
+
+
+/* =========================================================
+   Crimson card
+   Kept for existing markup/classes.
+   It intentionally matches the default product card exactly.
+   ========================================================= */
+
+.wc-product-card.wc-crimson {
+  background-color: var(--wc-crimson);
+  color: var(--wc-on-dark);
+}
+
+.wc-product-card.wc-crimson h3,
+.wc-product-card.wc-crimson .wc-product-price,
+.wc-product-card.wc-crimson .wc-product-link {
+  color: var(--wc-on-dark);
+}
+
+.wc-product-card.wc-crimson .wc-product-desc {
+  color: var(--wc-on-dark-muted);
+}
+
+.wc-product-card.wc-crimson .wc-product-meta {
+  color: var(--wc-marigold);
+}
+
+.wc-product-card.wc-crimson .wc-product-link:hover {
+  color: var(--wc-marigold);
+}
+
+
+/* List layout: photo on the left from the sm breakpoint */
+@media (min-width: 640px) {
+  .wc-product-card.wc-row {
+    flex-direction: row;
+  }
+
+  .wc-product-card.wc-row .wc-product-photo {
+    width: 13rem;
+    height: 13rem;
+    flex-shrink: 0;
+    aspect-ratio: auto;
+  }
+
+  .wc-product-card.wc-row .wc-product-photo > a {
+    display: block;
+    height: 100%;
+  }
+}
+
+
+/* Tags */
+.wc-tag {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+
+
+/* Icon buttons */
+.wc-icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(240, 232, 220, 0.92);
+  color: var(--wc-maroon);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.wc-icon-btn:hover {
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+
+.wc-icon-btn:focus-visible {
+  outline: 2px solid var(--wc-marigold);
+  outline-offset: 2px;
+}
+
+
+.wc-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: calc(100% - 2rem);
+  padding: 0.75rem 1.1rem;
+  border-radius: 6px;
+  background-color: var(--wc-maroon);
+  color: var(--wc-on-dark);
+  font-size: 0.85rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Light ivory pages (product, cart, checkout) */
+.wc-light-page {
+  background-color: var(--wc-ivory);
+}
+
+.wc-crumbs {
+  font-size: 0.75rem;
+  color: var(--wc-ink-muted);
+}
+
+.wc-crumbs a,
+.wc-crumbs a:hover {
+  color: var(--wc-ink-muted);
+}
+
+.wc-crumbs a:hover {
+  color: var(--wc-crimson);
+}
+
+.wc-panel {
+  border-radius: 8px;
+  background-color: var(--wc-stone);
+  padding: 1.25rem;
+}
+
+.wc-panel-title,
+.wc-page .wc-panel-title {
+  font-family: var(--wc-font-sans);
+  letter-spacing: 0.16em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wc-maroon);
+}
+
+.wc-panel-title svg {
+  color: var(--wc-gold-deep);
+}
+
+
+/* Form fields inside panels: restyle the shared .input-field */
+.wc-page .wc-panel .input-field {
+  border-color: rgba(67, 10, 18, 0.2);
+  border-radius: 4px;
+  background-color: #fffdf9;
+  font-family: var(--wc-font-sans);
+  font-size: 0.875rem;
+}
+
+.wc-page .wc-panel .input-field:focus {
+  border-color: var(--wc-crimson);
+  box-shadow: 0 0 0 2px rgba(137, 13, 32, 0.15);
+}
+
+.wc-page .wc-panel label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wc-ink) !important;
+}
+
+
+/* Quantity stepper */
+.wc-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(67, 10, 18, 0.25);
+  border-radius: 4px;
+  background-color: #fffdf9;
+}
+
+.wc-stepper button {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wc-maroon);
+}
+
+.wc-stepper button:disabled {
+  opacity: 0.35;
+}
+
+.wc-stepper span {
+  min-width: 2.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+
+/* Secondary light buttons under the main action */
+.wc-btn-soft {
+  background-color: var(--wc-stone);
+  color: var(--wc-ink);
+}
+
+.wc-btn-soft.wc-btn-soft:hover {
+  background-color: #e8e1d6;
+  color: var(--wc-ink);
+}
+
+.wc-btn-soft:disabled,
+.wc-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* Reassurance list */
+.wc-guarantee li {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--wc-ink-muted);
+}
+
+.wc-guarantee li svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--wc-gold-deep);
+}
+
+
+/* Alerts */
+.wc-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.wc-alert-error {
+  background-color: #fbeaea;
+  color: #8a1c1c;
+  border: 1px solid #f1c8c8;
+}
+
+.wc-alert-success {
+  background-color: #eef6ea;
+  color: #2f5a1f;
+  border: 1px solid #cfe5c4;
+}
+
+.wc-alert a {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.wc-stepper button:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 2px;
+}
+
+
+/* Form fields: label, icon inside the input, error text */
+.wc-field-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wc-ink);
+}
+
+.wc-field-label .wc-optional {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--wc-ink-muted);
+}
+
+.wc-field-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 0.8rem;
+  color: var(--wc-gold-deep);
+  pointer-events: none;
+}
+
+.wc-page .wc-panel .input-field.wc-invalid {
+  border-color: #c0392b;
+}
+
+.wc-field-error {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: #a02020;
+}
+
+
+/* Loading placeholders */
+.wc-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(67, 10, 18, 0.06) 25%,
+    rgba(67, 10, 18, 0.11) 50%,
+    rgba(67, 10, 18, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: wc-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes wc-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-skeleton {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-page *,
+  .wc-page *::before,
+  .wc-page *::after {
+    transition: none !important;
+  }
+}

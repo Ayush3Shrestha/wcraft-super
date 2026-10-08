@@ -1,0 +1,392 @@
+/* Navbar and footer in the Figma prototype's style (tokens in brand.css). */
+
+/* ---------- Announcement bar ---------- */
+.wc-topbar {
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+  font-family: var(--wc-font-sans);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.wc-topbar a,
+.wc-topbar a:hover {
+  color: var(--wc-on-dark);
+  text-decoration: none;
+}
+.wc-topbar a:hover {
+  color: var(--wc-marigold);
+}
+
+/* ---------- Main navigation ---------- */
+.wc-nav {
+  background-color: var(--wc-nav);
+  border-bottom: 1px solid rgba(67, 10, 18, 0.12);
+  font-family: var(--wc-font-sans);
+}
+.wc-nav.wc-nav-scrolled {
+  box-shadow: 0 6px 20px rgba(32, 28, 28, 0.08);
+}
+.wc-brand,
+.wc-brand:hover {
+  color: var(--wc-maroon);
+  text-decoration: none;
+}
+.wc-brand-name {
+  font-family: var(--wc-font-serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--wc-maroon);
+}
+.wc-brand-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wc-gold-text);
+}
+.wc-nav-link {
+  position: relative;
+  white-space: nowrap;
+  padding: 0.5rem 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wc-ink);
+  text-decoration: none;
+}
+.wc-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--wc-crimson);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+.wc-nav-link.wc-nav-link:hover {
+  color: var(--wc-crimson);
+  text-decoration: none;
+}
+.wc-nav-link:hover::after,
+.wc-nav-link.active::after {
+  transform: scaleX(1);
+}
+.wc-nav-link.active {
+  color: var(--wc-maroon);
+}
+.wc-nav-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  color: var(--wc-maroon);
+  transition: background-color 0.2s ease;
+}
+.wc-nav-icon.wc-nav-icon:hover {
+  background-color: rgba(67, 10, 18, 0.07);
+  color: var(--wc-maroon);
+  text-decoration: none;
+}
+.wc-nav-icon:focus-visible,
+.wc-nav-link:focus-visible,
+.wc-brand:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.wc-cart-badge {
+  position: absolute;
+  top: 0.1rem;
+  right: 0.05rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.25rem;
+  border-radius: 9999px;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+  font-size: 0.62rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wc-search-input {
+  width: 15rem;
+  height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 1px solid rgba(67, 10, 18, 0.25);
+  border-radius: 4px 0 0 4px;
+  background-color: #fff;
+  font-size: 0.85rem;
+  color: var(--wc-ink);
+}
+.wc-search-input:focus {
+  outline: none;
+  border-color: var(--wc-crimson);
+  box-shadow: 0 0 0 2px rgba(137, 13, 32, 0.15);
+}
+.wc-search-submit {
+  height: 2.5rem;
+  padding: 0 0.9rem;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+
+/* Mobile drawer */
+.wc-drawer {
+  background-color: var(--wc-nav);
+  font-family: var(--wc-font-sans);
+}
+.wc-drawer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.95rem 0.25rem;
+  border-bottom: 1px solid rgba(67, 10, 18, 0.1);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wc-ink);
+  text-decoration: none;
+}
+.wc-drawer-link.wc-drawer-link:hover {
+  color: var(--wc-crimson);
+  text-decoration: none;
+}
+.wc-drawer-link.active {
+  color: var(--wc-crimson);
+}
+
+/* ---------- Footer ---------- */
+.wc-footer {
+  background-color: var(--wc-maroon);
+  color: var(--wc-on-dark-muted);
+  font-family: var(--wc-font-sans);
+}
+.wc-footer h2 {
+  font-family: var(--wc-font-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wc-marigold);
+  margin-bottom: 1rem;
+}
+/* Plain links only; buttons (.wc-btn) keep their own colours */
+.wc-footer a:not(.wc-btn) {
+  color: var(--wc-on-dark-muted);
+  text-decoration: none;
+}
+.wc-footer a:not(.wc-btn):hover {
+  color: var(--wc-on-dark);
+  text-decoration: none;
+}
+.wc-footer .wc-brand-name {
+  color: var(--wc-marigold);
+}
+.wc-footer-social {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(248, 208, 88, 0.4);
+}
+.wc-footer a.wc-footer-social {
+  color: var(--wc-marigold);
+}
+.wc-footer a.wc-footer-social:hover {
+  background-color: var(--wc-marigold);
+  color: var(--wc-maroon);
+}
+.wc-footer-map {
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid rgba(248, 208, 88, 0.25);
+  background-color: var(--wc-maroon-soft);
+}
+.wc-footer-bottom {
+  border-top: 1px solid rgba(240, 232, 220, 0.12);
+  font-size: 0.72rem;
+}
+.wc-footer a:focus-visible {
+  outline: 2px solid var(--wc-marigold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.wc-to-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 40;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+  border: 1px solid rgba(248, 208, 88, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.wc-to-top:hover {
+  transform: translateY(-2px);
+}
+.wc-to-top:focus-visible {
+  outline: 2px solid var(--wc-marigold);
+  outline-offset: 2px;
+}
+
+/* Currency switcher (navbar and mobile drawer) */
+.wc-currency {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.wc-currency-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-ink-muted);
+}
+.wc-currency-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.5rem;
+  padding: 0 0.65rem;
+  border: 1px solid rgba(67, 10, 18, 0.18);
+  border-radius: 4px;
+  background-color: #fffdf9;
+  color: var(--wc-maroon);
+  font-family: var(--wc-font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.wc-currency-box:hover {
+  border-color: rgba(67, 10, 18, 0.4);
+}
+.wc-currency-box:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 2px;
+}
+.wc-currency-chevron {
+  flex-shrink: 0;
+  color: var(--wc-gold-deep);
+  transition: transform 0.2s ease;
+}
+.wc-currency-full {
+  display: flex;
+}
+.wc-currency-full .wc-currency-box {
+  width: 100%;
+  height: 2.9rem;
+}
+.wc-currency-full .wc-currency-box > span:not(.wc-flag) {
+  flex: 1;
+  text-align: left;
+}
+
+.wc-currency-list {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 70;
+  min-width: 13rem;
+  padding: 0.35rem;
+  border-radius: 6px;
+  border: 1px solid rgba(67, 10, 18, 0.12);
+  background-color: #fffdf9;
+  box-shadow: 0 18px 40px rgba(32, 28, 28, 0.18);
+  font-family: var(--wc-font-sans);
+}
+.wc-currency-list:focus {
+  outline: none;
+}
+.wc-currency-full .wc-currency-list {
+  left: 0;
+  right: 0;
+  min-width: 0;
+}
+.wc-currency-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--wc-ink);
+}
+.wc-currency-option.wc-active {
+  background-color: var(--wc-stone);
+}
+.wc-currency-list:focus-visible .wc-currency-option.wc-active {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: -2px;
+}
+.wc-currency-option[aria-selected="true"] {
+  color: var(--wc-maroon);
+}
+.wc-currency-option[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.wc-currency-option svg {
+  flex-shrink: 0;
+  color: var(--wc-maroon);
+}
+.wc-currency-code {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.wc-currency-name {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--wc-ink-muted);
+}
+
+/* Inline SVG flags */
+.wc-flag {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 0.9rem;
+  overflow: hidden;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.wc-flag svg {
+  width: 100%;
+  height: 100%;
+}
+/* Nepal's flag isn't a rectangle */
+.wc-flag-np {
+  width: 0.8rem;
+  height: 1rem;
+  margin: 0 0.275rem;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}

@@ -1,0 +1,23 @@
+.input-field {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 1rem;
+  font-family: var(--font-primary);
+  color: var(--dark-gray);
+  background-color: white;
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-md);
+  transition: var(--transition-normal);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--saffron);
+  box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2);
+}
+
+.input-field::placeholder {
+  color: var(--stone-gray);
+  opacity: 0.8;
+}

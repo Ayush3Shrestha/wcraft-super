@@ -1,0 +1,185 @@
+/* Products page (/products) in the prototype's style. Shared pieces are in shop.css. */
+
+/* Dark page header with the live prices */
+.wc-catalog-head {
+  position: relative;
+  isolation: isolate;
+  background-size: cover;
+  background-position: 70% 30%;
+}
+.wc-catalog-head::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(20, 16, 16, 0.95) 0%, rgba(20, 16, 16, 0.85) 55%, rgba(20, 16, 16, 0.7) 100%);
+}
+.wc-catalog-head p {
+  color: var(--wc-on-dark-muted);
+}
+
+/* Filters panel */
+.wc-filter-panel {
+  border-radius: 6px;
+  background-color: var(--wc-paper);
+  border: 1px solid rgba(67, 10, 18, 0.1);
+  padding: 1.5rem;
+}
+.wc-filter-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wc-maroon);
+  margin-bottom: 0.75rem;
+}
+.wc-field {
+  width: 100%;
+  height: 2.6rem;
+  padding: 0 0.85rem;
+  border: 1px solid rgba(67, 10, 18, 0.2);
+  border-radius: 4px;
+  background-color: #fffdf9;
+  font-family: var(--wc-font-sans);
+  font-size: 0.875rem;
+  color: var(--wc-ink);
+}
+.wc-field:focus {
+  outline: none;
+  border-color: var(--wc-crimson);
+  box-shadow: 0 0 0 2px rgba(137, 13, 32, 0.15);
+}
+.wc-field::placeholder {
+  color: var(--wc-ink-muted);
+  opacity: 0.8;
+}
+select.wc-field {
+  padding-right: 2rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23430a12' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+/* Category options: the native radio is kept for keyboard and screen readers */
+.wc-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--wc-ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.wc-option:hover {
+  background-color: rgba(67, 10, 18, 0.05);
+}
+.wc-option input {
+  accent-color: var(--wc-maroon);
+  width: 1rem;
+  height: 1rem;
+}
+.wc-option.wc-selected {
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+.wc-option-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--wc-gold-text);
+}
+.wc-option.wc-selected input {
+  accent-color: var(--wc-marigold);
+}
+.wc-option.wc-selected .wc-option-count {
+  color: var(--wc-marigold);
+}
+
+.wc-text-btn {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-crimson);
+}
+.wc-text-btn:hover {
+  text-decoration: underline;
+}
+
+/* Toolbar */
+.wc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.4rem 0.3rem 0.75rem;
+  border-radius: 9999px;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.wc-pill button {
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 0.15rem;
+}
+.wc-pill button:hover {
+  background-color: rgba(248, 208, 88, 0.2);
+}
+.wc-segmented {
+  display: inline-flex;
+  border: 1px solid rgba(67, 10, 18, 0.25);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.wc-segmented button {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wc-maroon);
+  background-color: #fffdf9;
+}
+.wc-segmented button[aria-pressed="true"] {
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+
+/* Pagination */
+.wc-page-btn {
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border-radius: 4px;
+  border: 1px solid rgba(67, 10, 18, 0.25);
+  background-color: #fffdf9;
+  color: var(--wc-maroon);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.wc-page-btn:hover:not(:disabled) {
+  border-color: var(--wc-maroon);
+}
+.wc-page-btn[aria-current="page"] {
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+  border-color: var(--wc-maroon);
+}
+.wc-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.wc-option:focus-within,
+.wc-segmented button:focus-visible,
+.wc-page-btn:focus-visible,
+.wc-pill button:focus-visible,
+.wc-text-btn:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 2px;
+}

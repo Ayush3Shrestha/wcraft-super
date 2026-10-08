@@ -1,0 +1,300 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+/* Tailwind CSS imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Buddhist Cultural Color Palette */
+    --saffron: #FF8C00;
+    --deep-saffron: #E67E00;
+    --light-saffron: #FFB84D;
+    --maroon: #8B2635;
+    --deep-maroon: #6B1D2A;
+    --light-maroon: #A64D5A;
+    --golden: #D4AF37;
+    --deep-golden: #B8941F;
+    --light-golden: #F0D674;
+    --lotus-white: #FEFEFE;
+    --cream: #FAF7F0;
+    --earth-brown: #8B4513;
+    --warm-brown: #A0522D;
+    --light-brown: #D2B48C;
+    --stone-gray: #696969;
+    --light-gray: #D3D3D3;
+    --dark-gray: #2F2F2F;
+    --jade-green: #00A86B;
+    --light-jade: #4DCEA3;
+    --sky-blue: #87CEEB;
+    --deep-blue: #4682B4;
+    
+    /* Typography */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 300ms ease;
+    --transition-slow: 500ms ease;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-primary);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--dark-gray);
+  }
+
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
+  h3 { font-size: 1.75rem; }
+  h4 { font-size: 1.5rem; }
+  h5 { font-size: 1.25rem; }
+  h6 { font-size: 1.125rem; }
+}
+
+@layer components {
+  /* Buddhist-themed Button Styles */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-2 font-medium text-sm leading-6 text-center border-2 border-transparent rounded-lg cursor-pointer transition-all duration-300 min-h-[44px];
+  }
+
+  .btn-primary {
+    background-color: var(--saffron);
+    color: white;
+    border-color: var(--saffron);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--deep-saffron);
+    border-color: var(--deep-saffron);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--maroon);
+    border-color: var(--maroon);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--maroon);
+    color: white;
+  }
+
+  .btn-golden {
+    background: linear-gradient(135deg, var(--golden), var(--deep-golden));
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-golden:hover {
+    background: linear-gradient(135deg, var(--deep-golden), var(--golden));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Card Styles */
+  .card {
+    @apply bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300;
+  }
+
+  .card:hover {
+    @apply shadow-xl;
+    transform: translateY(-4px);
+  }
+
+  .card-header {
+    @apply p-6 border-b border-gray-200;
+  }
+
+  .card-body {
+    @apply p-6;
+  }
+
+  .card-footer {
+    @apply p-6 border-t border-gray-200;
+    background-color: var(--cream);
+  }
+
+  /* Input Styles */
+  .input-field {
+    @apply block w-full px-4 py-2 text-base border border-gray-300 rounded-lg transition-all duration-300;
+    font-family: var(--font-primary);
+    color: var(--dark-gray);
+    background-color: white;
+  }
+
+  .input-field:focus {
+    @apply outline-none;
+    border-color: var(--saffron);
+    box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2);
+  }
+
+  .input-field::placeholder {
+    color: var(--stone-gray);
+    opacity: 0.8;
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply w-10 h-10 border-4 border-gray-200 rounded-full animate-spin;
+    border-top-color: var(--saffron);
+  }
+
+  /* Container */
+  .container {
+    @apply max-w-6xl mx-auto px-4;
+  }
+
+  .container-fluid {
+    @apply w-full px-6;
+  }
+}
+
+@layer utilities {
+  /* Buddhist Cultural Colors */
+  .text-saffron { color: var(--saffron); }
+  .text-maroon { color: var(--maroon); }
+  .text-golden { color: var(--golden); }
+  .text-gray { color: var(--stone-gray); }
+
+  .bg-cream { background-color: var(--cream); }
+  .bg-saffron { background-color: var(--saffron); }
+  .bg-golden { background-color: var(--golden); }
+
+  /* Custom animations */
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from { 
+      text-shadow: 0 0 5px var(--golden), 0 0 10px var(--golden); 
+    }
+    to { 
+      text-shadow: 0 0 10px var(--golden), 0 0 20px var(--golden), 0 0 30px var(--golden); 
+    }
+  }
+
+  /* Pattern utilities */
+  .pattern-lotus {
+    background-image: 
+      radial-gradient(circle at 25px 25px, var(--light-golden) 2%, transparent 2%),
+      radial-gradient(circle at 75px 75px, var(--light-golden) 2%, transparent 2%);
+    background-size: 100px 100px;
+    opacity: 0.1;
+  }
+
+  /* Typography utilities */
+  .font-display { font-family: var(--font-display); }
+  .font-primary { font-family: var(--font-primary); }
+
+  /* Om symbol styling */
+  .om-symbol {
+    @apply text-2xl animate-glow;
+    color: var(--golden);
+  }
+}
+
+/* Global link styles */
+a {
+  color: var(--saffron);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--deep-saffron);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+  
+  .container {
+    @apply px-4;
+  }
+}

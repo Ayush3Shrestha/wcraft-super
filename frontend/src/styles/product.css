@@ -1,0 +1,389 @@
+/* Single product page (/product/:id) in the prototype's light ivory style.
+   Shared pieces (page base, panels, stepper, alerts, product cards) are in shop.css. */
+
+.wc-pd {
+  background-color: var(--wc-ivory);
+}
+
+/* Gallery */
+.wc-gallery-main {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background-color: var(--wc-charcoal);
+  aspect-ratio: 1 / 1;
+  box-shadow: 0 18px 40px rgba(32, 28, 28, 0.15);
+}
+/* Carousel track: one slide per image, swipeable with scroll snapping */
+.wc-carousel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.wc-carousel::-webkit-scrollbar {
+  display: none;
+}
+.wc-carousel:focus-visible {
+  outline: 2px solid var(--wc-marigold);
+  outline-offset: -4px;
+}
+.wc-slide {
+  flex: 0 0 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.wc-slide img,
+.wc-slide-zoom {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.wc-slide img {
+  object-fit: cover;
+  user-select: none;
+}
+.wc-slide-zoom {
+  cursor: zoom-in;
+}
+.wc-slide-zoom:focus-visible {
+  outline: 2px solid var(--wc-marigold);
+  outline-offset: -4px;
+}
+
+/* Position dots and counter */
+.wc-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 1.35rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.35rem;
+  pointer-events: none;
+}
+.wc-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background-color: rgba(250, 247, 242, 0.55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+.wc-dot-on {
+  width: 1.2rem;
+  background-color: var(--wc-marigold);
+}
+.wc-gallery-count {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 9999px;
+  background-color: rgba(32, 28, 28, 0.65);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.wc-gallery-count.wc-below-badge {
+  top: 3.4rem;
+}
+/* Many dots don't fit between the bottom buttons on phones */
+@media (max-width: 639px) {
+  .wc-dots.wc-many {
+    display: none;
+  }
+}
+.wc-gallery-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+.wc-gallery-chip {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 9999px;
+  background-color: rgba(250, 247, 242, 0.92);
+  color: var(--wc-ink);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.wc-gallery-chip::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background-color: var(--wc-gold-deep);
+}
+.wc-gallery-tool {
+  position: absolute;
+  bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 4px;
+  background-color: rgba(250, 247, 242, 0.92);
+  color: var(--wc-ink);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.wc-gallery-tool:hover {
+  background-color: #fff;
+}
+.wc-gallery-nav {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(250, 247, 242, 0.9);
+  color: var(--wc-maroon);
+}
+/* Thumbnail strip, scrolls sideways when there are many images */
+.wc-thumbs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 0.25rem;
+}
+.wc-thumbs .wc-thumb {
+  flex: 0 0 calc((100% - 2rem) / 5);
+}
+.wc-thumb {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  aspect-ratio: 1 / 1;
+  border: 2px solid transparent;
+  background-color: var(--wc-stone);
+  opacity: 0.8;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+.wc-thumb:hover {
+  opacity: 1;
+}
+.wc-thumb[aria-current="true"] {
+  border-color: var(--wc-maroon);
+  opacity: 1;
+}
+.wc-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Details column */
+.wc-pd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  background-color: rgba(137, 13, 32, 0.08);
+  color: var(--wc-crimson);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.wc-pd-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--wc-ink-muted);
+}
+.wc-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+.wc-tile {
+  border-radius: 6px;
+  background-color: var(--wc-stone);
+  padding: 0.85rem 0.6rem;
+  text-align: center;
+}
+.wc-tile svg {
+  margin: 0 auto 0.35rem;
+  color: var(--wc-crimson);
+}
+.wc-tile-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-ink-muted);
+}
+.wc-tile-value {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--wc-ink);
+}
+
+.wc-price-big {
+  font-family: var(--wc-font-serif);
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--wc-maroon);
+}
+.wc-price-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  background-color: rgba(248, 208, 88, 0.45);
+  color: var(--wc-gold-deep);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.wc-spec-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--wc-line);
+  font-size: 0.875rem;
+}
+.wc-spec-row:last-child {
+  border-bottom: 0;
+}
+.wc-spec-row dt {
+  color: var(--wc-ink-muted);
+}
+.wc-spec-row dd {
+  text-align: right;
+  font-weight: 600;
+  color: var(--wc-ink);
+}
+
+/* Light product cards for the related section */
+.wc-product-card.wc-light {
+  background-color: var(--wc-maroon);
+}
+
+/* Full-screen image viewer */
+.wc-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem 6.5rem;
+  background-color: rgba(20, 16, 16, 0.94);
+  font-family: var(--wc-font-sans);
+}
+.wc-viewer-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+.wc-viewer-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  color: var(--wc-on-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.wc-viewer-count {
+  color: var(--wc-on-dark-muted);
+}
+.wc-viewer-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: rgba(250, 247, 242, 0.12);
+  color: var(--wc-on-dark);
+}
+.wc-viewer-btn:hover {
+  background-color: rgba(250, 247, 242, 0.22);
+}
+.wc-viewer-btn:focus-visible {
+  outline: 2px solid var(--wc-marigold);
+  outline-offset: 2px;
+}
+.wc-viewer-prev,
+.wc-viewer-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.wc-viewer-prev {
+  left: 1rem;
+}
+.wc-viewer-next {
+  right: 1rem;
+}
+.wc-viewer-thumbs {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  max-width: calc(100% - 2rem);
+  overflow-x: auto;
+}
+.wc-viewer-thumbs .wc-thumb {
+  flex: 0 0 3.5rem;
+  background-color: var(--wc-charcoal-soft);
+}
+.wc-viewer-thumbs .wc-thumb[aria-current="true"] {
+  border-color: var(--wc-marigold);
+}
+
+.wc-pd .wc-thumb:focus-visible,
+.wc-pd .wc-gallery-tool:focus-visible,
+.wc-pd .wc-gallery-nav:focus-visible,
+.wc-viewer .wc-thumb:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 2px;
+}

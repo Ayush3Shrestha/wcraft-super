@@ -1,0 +1,106 @@
+/*
+ * Home page styles, taken from the Figma prototype: deep maroon, crimson,
+ * marigold and antique gold on cream and charcoal, Playfair Display headings
+ * with gold italics, Plus Jakarta Sans for everything else.
+ * Hero, collage, category cards and the dark highlights band. Shared
+ * pieces (page base, price and product cards) are in shop.css.
+ */
+
+/* Hero */
+.wc-hero {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--wc-charcoal);
+  /* background-image is set inline from /public/images/hero-tara.webp */
+  background-size: cover;
+  background-position: 70% center;
+}
+.wc-hero::before {
+  /* Darken the photo so text stays readable, strongest on the left */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(20, 16, 16, 0.94) 0%, rgba(20, 16, 16, 0.82) 45%, rgba(20, 16, 16, 0.55) 100%),
+    linear-gradient(0deg, rgba(20, 16, 16, 0.85) 0%, rgba(20, 16, 16, 0) 35%);
+}
+.wc-hero h1 {
+  color: var(--wc-on-dark);
+}
+.wc-hero p {
+  color: var(--wc-on-dark-muted);
+}
+
+/* Collage photos in the hero */
+.wc-photo {
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid rgba(229, 193, 88, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  background-color: var(--wc-charcoal-soft);
+}
+.wc-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.wc-photo:hover img {
+  transform: scale(1.04);
+}
+
+/* Category cards */
+.wc-category-card {
+  display: block;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: var(--wc-paper);
+  border: 1px solid rgba(67, 10, 18, 0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.wc-category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(67, 10, 18, 0.12);
+}
+/* Header band for categories that have no image */
+.wc-category-band {
+  height: 12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 120%, rgba(248, 208, 88, 0.22), transparent 60%),
+    var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+.wc-category-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+.wc-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wc-gold-text);
+}
+
+/* Dark highlights band (.wc-dark itself is in shop.css) */
+.wc-step-card {
+  border-radius: 6px;
+  background-color: var(--wc-charcoal-soft);
+  border: 1px solid rgba(240, 232, 220, 0.08);
+  padding: 1.75rem;
+}
+.wc-step-number {
+  font-family: var(--wc-font-serif);
+  font-size: 1.75rem;
+  color: var(--wc-gold);
+}

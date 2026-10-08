@@ -1,0 +1,239 @@
+/* Cart (/cart) and checkout (/checkout) in the prototype's light ivory
+   style. Panels, stepper, alerts and soft buttons are in shop.css. */
+
+/* Checkout progress: Cart → Details → Confirmed */
+.wc-steps {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-ink-muted);
+}
+.wc-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.wc-steps .wc-step-dot {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(67, 10, 18, 0.25);
+  font-size: 0.65rem;
+  letter-spacing: 0;
+}
+.wc-steps li[aria-current="step"] {
+  color: var(--wc-maroon);
+}
+.wc-steps li[aria-current="step"] .wc-step-dot,
+.wc-steps li.wc-done .wc-step-dot {
+  border-color: var(--wc-maroon);
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+.wc-steps .wc-step-line {
+  width: 1.5rem;
+  height: 1px;
+  background-color: rgba(67, 10, 18, 0.25);
+}
+
+/* Cart line items */
+.wc-cart-item {
+  border-radius: 8px;
+  background-color: var(--wc-stone);
+  padding: 1rem;
+  transition: opacity 0.2s ease;
+}
+.wc-cart-item[aria-busy="true"] {
+  opacity: 0.6;
+}
+.wc-cart-thumb {
+  display: block;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: var(--wc-charcoal);
+  flex-shrink: 0;
+}
+.wc-cart-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wc-page .wc-cart-title,
+.wc-page .wc-cart-title:hover {
+  color: var(--wc-ink);
+}
+.wc-page .wc-cart-title:hover {
+  color: var(--wc-crimson);
+}
+.wc-cart-meta {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-gold-text);
+}
+.wc-line-price {
+  font-family: var(--wc-font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--wc-maroon);
+}
+
+/* Custom piece details and the inline editor inside an item */
+.wc-spec-box {
+  border-radius: 6px;
+  background-color: #fffdf9;
+  border: 1px solid var(--wc-line);
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+}
+.wc-page .wc-spec-box .wc-panel-title {
+  font-size: 0.6rem;
+}
+.wc-page .wc-spec-box .input-field {
+  border-color: rgba(67, 10, 18, 0.2);
+  border-radius: 4px;
+  background-color: #fff;
+  font-family: var(--wc-font-sans);
+  font-size: 0.875rem;
+}
+.wc-page .wc-spec-box .input-field:focus,
+.wc-page .wc-cart-item .input-field:focus {
+  border-color: var(--wc-crimson);
+  box-shadow: 0 0 0 2px rgba(137, 13, 32, 0.15);
+}
+.wc-page .wc-spec-box label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wc-ink) !important;
+}
+.wc-page .wc-cart-item .input-field {
+  border-color: rgba(67, 10, 18, 0.2);
+  border-radius: 4px;
+  font-family: var(--wc-font-sans);
+  font-size: 0.875rem;
+}
+
+/* Small text actions (edit details, add a note, clear cart) */
+.wc-text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--wc-crimson);
+  text-align: left;
+}
+.wc-page .wc-text-btn,
+.wc-page .wc-text-btn:hover {
+  color: var(--wc-crimson);
+}
+.wc-text-btn:hover {
+  text-decoration: underline;
+}
+.wc-text-btn.wc-muted,
+.wc-page .wc-text-btn.wc-muted:hover {
+  color: var(--wc-ink-muted);
+}
+.wc-text-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.wc-text-btn:focus-visible,
+.wc-remove-btn:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 2px;
+}
+.wc-remove-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wc-ink-muted);
+  flex-shrink: 0;
+}
+.wc-remove-btn:hover {
+  background-color: rgba(137, 13, 32, 0.08);
+  color: var(--wc-crimson);
+}
+
+.wc-cart-item .wc-stepper button {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+.wc-cart-item .wc-stepper span {
+  min-width: 2rem;
+}
+
+/* Order summary card */
+.wc-summary {
+  border-radius: 10px;
+  background-color: #fffdf9;
+  border: 1px solid var(--wc-line);
+  box-shadow: 0 18px 40px rgba(67, 10, 18, 0.08);
+  padding: 1.5rem;
+}
+.wc-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--wc-ink-muted);
+}
+.wc-summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--wc-line);
+}
+.wc-summary-total .wc-price-big {
+  font-family: var(--wc-font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--wc-maroon);
+}
+.wc-summary-item + .wc-summary-item {
+  border-top: 1px solid var(--wc-line);
+  padding-top: 0.85rem;
+}
+
+/* Empty, error and success states */
+.wc-state-icon {
+  width: 5rem;
+  height: 5rem;
+  margin: 0 auto 1.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--wc-stone);
+  color: var(--wc-maroon);
+}
+.wc-state-icon.wc-success {
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+}
+.wc-order-ref {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  background-color: rgba(248, 208, 88, 0.45);
+  color: var(--wc-gold-deep);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
