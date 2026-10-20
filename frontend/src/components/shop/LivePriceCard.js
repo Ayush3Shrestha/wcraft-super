@@ -20,9 +20,10 @@ export default function LivePriceCard({ label, price }) {
   return (
     <div className="wc-price-card">
       {/* Label and daily change on one row, the amount on its own row, so
-          long amounts (e.g. a gold rate in rupees) don't push anything out */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="wc-price-label min-w-0">{label}</div>
+          long amounts (e.g. a gold rate in rupees) don't push anything out;
+          the change wraps under the label when the card is narrow */}
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5">
+        <div className="wc-price-label whitespace-nowrap">{label}</div>
         <span
           className={`wc-price-change ${
             change.direction === "up" ? "wc-change-up" : change.direction === "down" ? "wc-change-down" : ""

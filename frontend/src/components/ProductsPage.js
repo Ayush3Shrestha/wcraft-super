@@ -223,25 +223,29 @@ const ProductsPage = () => {
   return (
     <div className="wc-page min-h-screen" style={{ backgroundColor: "var(--wc-cream-light)" }}>
       {/* Header */}
-      <section className="wc-dark wc-on-dark wc-catalog-head px-4 sm:px-6 py-14 lg:py-16" style={{ backgroundImage: `url(${HEADER_IMAGE})` }}>
-        <div className="container mx-auto">
-          <span className="wc-eyebrow">Handcrafted in Patan</span>
-          <h1 className="text-4xl sm:text-5xl mt-3">
-            Our <span className="wc-accent">Collection</span>
-          </h1>
-          <p className="mt-3 max-w-xl text-base sm:text-lg">
-            Buddhist statues and ornaments in silver, gold finishes, copper and bronze.
-          </p>
+      {/* Kept short so the products show without scrolling: title and live
+          prices sit side by side on wide screens */}
+      <section className="wc-dark wc-on-dark wc-catalog-head px-4 sm:px-6 py-5 lg:py-8" style={{ backgroundImage: `url(${HEADER_IMAGE})` }}>
+        <div className="container mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-8">
+          <div>
+            <span className="wc-eyebrow">Handcrafted in Patan</span>
+            <h1 className="text-3xl sm:text-4xl mt-1">
+              Our <span className="wc-accent">Collection</span>
+            </h1>
+            <p className="hidden sm:block mt-1 max-w-xl text-base">
+              Buddhist statues and ornaments in silver, gold finishes, copper and bronze.
+            </p>
+          </div>
           {(silverPrice || goldPrice) && (
-            <div className="grid sm:grid-cols-2 gap-3 max-w-xl mt-8">
-              {silverPrice && <LivePriceCard label="Live silver price" price={silverPrice} />}
-              {goldPrice && <LivePriceCard label="Live gold price" price={goldPrice} />}
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full max-w-xl lg:w-auto lg:min-w-[30rem] flex-shrink-0">
+              {silverPrice && <LivePriceCard label="Silver today" price={silverPrice} />}
+              {goldPrice && <LivePriceCard label="Gold today" price={goldPrice} />}
             </div>
           )}
         </div>
       </section>
 
-      <div className="container mx-auto px-4 sm:px-6 py-10">
+      <div className="container mx-auto px-4 sm:px-6 py-6">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters */}
           <aside className="lg:w-72 flex-shrink-0">

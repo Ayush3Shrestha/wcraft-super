@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const connectDB = require("./src/Config/db");
-require("./src/Services/cron");
+const { runStartupPriceUpdate } = require("./src/Services/cron");
 
 // Import routes
 const silverPrice = require("./src/Routes/silverPriceRoute");
@@ -16,8 +16,9 @@ const admin = require("./src/Routes/adminRoute");
 const cart = require("./src/Routes/cartRoute");
 const currency = require("./src/Routes/currencyRoute");
 
-// Connect to database
-connectDB();
+// Connect to database, then refresh silver/gold prices so a restart never
+// leaves stale rates waiting for the next scheduled run
+connectDB().then(() => runStartupPriceUpdate());
 
 // Middleware
 app.use(cors());
