@@ -54,6 +54,7 @@ function buildProductFields(body, productType, materialType) {
     description: body.description,
     dimensions,
     isActive: body.isActive,
+    isFeatured: body.isFeatured,
   };
 
   if (productType === "silver") {
@@ -71,6 +72,7 @@ function buildProductFields(body, productType, materialType) {
     Object.assign(fields, {
       silverType,
       makingCost: body.makingCost,
+      showTotalPrice: body.showTotalPrice,
       weightInTola: body.weightInTola,
       stockQuantity: body.stockQuantity,
       weightRange: parseObject(body.weightRange),
@@ -199,6 +201,7 @@ exports.getAllProducts = async (req, res) => {
       platingMethod,
       search,
       includeInactive,
+      featured,
       sort = "newest",
       minPrice,
       maxPrice,
@@ -212,6 +215,8 @@ exports.getAllProducts = async (req, res) => {
     if (String(includeInactive) !== "true") {
       filter.isActive = { $ne: false };
     }
+
+    if (String(featured) === "true") filter.isFeatured = true;
 
     if (category) {
       filter.category = category;

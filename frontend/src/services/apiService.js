@@ -64,6 +64,8 @@ class ApiService {
     if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
     // Hidden products are only returned when asked for (admin panel)
     if (filters.includeInactive) params.append("includeInactive", "true");
+    // Only products marked as featured (home page)
+    if (filters.featured) params.append("featured", "true");
     if (filters.limit) params.append("limit", filters.limit);
     if (filters.page) params.append("page", filters.page);
 

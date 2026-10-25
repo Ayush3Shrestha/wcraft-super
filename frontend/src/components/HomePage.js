@@ -5,6 +5,7 @@ import ApiService from "../services/apiService";
 import { imageUrl, isCustomSilver } from "../lib/productDisplay";
 import LivePriceCard from "./shop/LivePriceCard";
 import ProductTile from "./shop/ProductTile";
+import CardSlider from "./shop/CardSlider";
 import "../styles/home.css";
 
 const HERO_IMAGE = `${process.env.PUBLIC_URL}/images/hero-tara.webp`;
@@ -39,7 +40,8 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       const [productsRes, categoriesRes, silverRes, goldRes] = await Promise.allSettled([
-        ApiService.getAllProducts({ limit: 8 }),
+        // Only products the admin marked as featured
+        ApiService.getAllProducts({ featured: true, limit: 24 }),
         ApiService.getAllCategories(true),
         ApiService.getTodaysSilverPrice(),
         ApiService.getTodaysGoldPrice(),
@@ -148,7 +150,7 @@ const HomePage = () => {
           </div>
 
           {categories.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CardSlider perView={3} label="Categories">
               {categories.map((category) => {
                 const Icon = MATERIAL_ICONS[category.materialType] || Package;
                 return (
@@ -186,7 +188,7 @@ const HomePage = () => {
                   </Link>
                 );
               })}
-            </div>
+            </CardSlider>
           ) : (
             !loading && <p style={{ color: "var(--wc-ink-muted)" }}>Categories will appear here soon.</p>
           )}
@@ -217,18 +219,19 @@ const HomePage = () => {
               <p style={{ color: "var(--wc-ink-muted)" }}>Loading Buddhist treasures...</p>
             </div>
           ) : featuredProducts.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {featuredProducts.slice(0, 8).map((product, index) => (
+            <CardSlider perView={4} label="Featured products">
+              {featuredProducts.map((product, index) => (
                 <ProductTile key={product._id} product={product} crimson={index % 4 === 0} onAddToCart={addToCart} />
               ))}
-            </div>
+            </CardSlider>
           ) : (
             <div className="text-center py-12">
               <p className="text-lg" style={{ color: "var(--wc-ink-muted)" }}>
-                No products available at the moment.
+                No featured pieces at the moment.
               </p>
               <p className="text-sm mt-2" style={{ color: "var(--wc-ink-muted)" }}>
-                Please check back later or <Link to="/contact" className="underline">contact us</Link>.
+                Browse the <Link to="/products" className="underline">full collection</Link> or{" "}
+                <Link to="/contact" className="underline">contact us</Link>.
               </p>
             </div>
           )}

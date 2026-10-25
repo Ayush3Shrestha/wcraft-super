@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import { useCurrency } from "../../lib/currency";
 
 // "+20" / "-15" / "0" (NPR) -> { text, direction }, the amount in the shown currency
-function describeChange(change, format) {
+export function describeChange(change, format) {
   const text = change == null ? "" : String(change).trim();
   const amount = Number(text.replace(/[^\d.]/g, ""));
   const shown = amount > 0 ? format(amount) : text.replace(/^[+-]/, "");

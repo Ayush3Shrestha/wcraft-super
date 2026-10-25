@@ -30,7 +30,7 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
         <Link to={url} tabIndex={-1} aria-hidden="true">
           <img src={productImage(product)} onError={fallbackToPlaceholder} alt="" />
         </Link>
-        {isSilver(product) && <span className="wc-tag">{custom ? "Made to order" : "Live price"}</span>}
+        {isSilver(product) && <span className="wc-tag">Live price</span>}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           <Link to={url} className="wc-icon-btn" aria-label={`View ${product.title}`}>
             <Eye size={16} />

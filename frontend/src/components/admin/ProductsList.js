@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { Pencil, Plus, Trash2, ImageOff } from "lucide-react"
 import { Button } from "../ui/button"
+import { Switch } from "../ui/switch"
 import { Input } from "../ui/input"
 import ApiService from "../../services/apiService"
 import {
@@ -27,6 +28,7 @@ const HEAD = [
   { label: "Type" },
   { label: "Price" },
   { label: "Stock" },
+  { label: "Home" },
   { label: "Actions", className: "text-right" },
 ]
 
@@ -43,6 +45,25 @@ export default function ProductsList() {
   const [searchInput, setSearchInput] = useState("")
   const [toDelete, setToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [saving, setSaving] = useState(null)
+
+  // Change one yes/no field of a product straight from the list:
+  // showTotalPrice (silver: show the added total, not just rate + making)
+  // or isFeatured (shown on the home page)
+  async function quickUpdate(product, field, value) {
+    setSaving(product._id)
+    setError("")
+    try {
+      const fd = new FormData()
+      fd.append(field, String(value))
+      const { product: saved } = await ApiService.updateProduct(product._id, fd)
+      setProducts((list) => list.map((p) => (p._id === product._id ? { ...p, [field]: saved[field] } : p)))
+    } catch (err) {
+      setError(err.message || "Failed to update the product")
+    } finally {
+      setSaving(null)
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -157,9 +178,40 @@ export default function ProductsList() {
                 </td>
                 <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{p.category?.name || "—"}</td>
                 <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{describeProduct(p)}</td>
-                <td className="px-4 py-3 text-gray-900 whitespace-nowrap">{describePrice(p)}</td>
+                <td className="px-4 py-3 text-gray-900 whitespace-nowrap">
+                  {describePrice(p)}
+                  {p.productType === "silver" && (
+                    <label className="mt-1 flex items-center gap-2 text-xs text-gray-600">
+                      <Switch
+                        checked={p.showTotalPrice === true}
+                        disabled={saving === p._id}
+                        onCheckedChange={(on) => quickUpdate(p, "showTotalPrice", on)}
+                        aria-label={`Show total price for ${p.title}`}
+                      />
+                      Show total
+                    </label>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-gray-700">
-                  {p.silverType === "custom" ? "Made to order" : p.stockQuantity ?? "—"}
+                  {p.silverType === "custom"
+                    ? "Custom"
+                    : Number(p.stockQuantity) > 0
+                    ? p.stockQuantity
+                    : <span className="text-red-600">Out of stock</span>}
+                </td>
+                <td className="px-4 py-3">
+                  <select
+                    value={p.isFeatured ? "featured" : "normal"}
+                    disabled={saving === p._id}
+                    onChange={(e) => quickUpdate(p, "isFeatured", e.target.value === "featured")}
+                    aria-label={`Home page showcase for ${p.title}`}
+                    className={`rounded-md border px-2 py-1 text-sm ${
+                      p.isFeatured ? "border-amber-300 bg-amber-50 text-amber-800 font-medium" : "border-gray-300 bg-white text-gray-700"
+                    }`}
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="featured">Featured</option>
+                  </select>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1">

@@ -20,6 +20,10 @@ import {
   Package,
   ArrowRight,
   BadgeCheck,
+  Layers,
+  Handshake,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import ApiService from "../services/apiService";
 import { SHOP } from "../lib/shopInfo";
@@ -31,67 +35,88 @@ import {
   valuesToSpec,
 } from "./CustomPieceForm";
 import {
+  formatLength,
   isCustomSilver,
+  isInStock,
   isSilver,
   label,
   priceLabel,
+  productHeight,
   productImage,
   productImages,
-  variantLabel,
+  showsTotal,
 } from "../lib/productDisplay";
 import ProductTile from "./shop/ProductTile";
 import ProductGallery from "./shop/ProductGallery";
+import { describeChange } from "./shop/LivePriceCard";
 import { CurrencyDisclaimer, NprEquivalent } from "./shop/CurrencyNote";
 import { useCurrency } from "../lib/currency";
 import "../styles/product.css";
 
 const WHATSAPP_PHONE = SHOP.whatsapp;
 
-const SpecRow = ({ name, value }) =>
-  value == null || value === "" ? null : (
-    <div className="wc-spec-row">
-      <dt>{name}</dt>
-      <dd>{value}</dd>
-    </div>
-  );
-
 const capitalize = (v) => (v ? v[0].toUpperCase() + v.slice(1) : "");
 
-// Three summary tiles under the title, from the product's real fields
-function summaryTiles(p) {
+// Specifications shown under the title. Each comes from one product field,
+// so nothing (category, finish, ...) is listed twice on the page.
+function specList(p) {
   const opts = p.customOptions || {};
-  const dims = p.dimensions || {};
-  const height = dims.height ? `${dims.height} ${dims.unit || "inch"}` : null;
+  const time = opts.productionTime;
+  let specs;
   if (isCustomSilver(p)) {
-    return [
-      { Icon: Hammer, label: "Type", value: "Made to order" },
-      { Icon: Scale, label: "Weight", value: `${p.weightRange?.min}–${p.weightRange?.max} tola` },
-      { Icon: Clock, label: "Ready in", value: opts.productionTime ? `${opts.productionTime.minDays}–${opts.productionTime.maxDays} days` : "Ask us" },
-    ];
-  }
-  if (isSilver(p)) {
-    return [
+    specs = [
       { Icon: Sparkles, label: "Metal", value: "Silver" },
-      { Icon: Scale, label: "Weight", value: p.weightInTola ? `${p.weightInTola} tola` : "—" },
-      height ? { Icon: Ruler, label: "Height", value: height } : { Icon: Package, label: "Availability", value: p.stockQuantity > 0 ? `${p.stockQuantity} in stock` : "Ask us" },
+      { Icon: Scale, label: "Weight range", value: p.weightRange && `${p.weightRange.min}–${p.weightRange.max} tola` },
+      { Icon: Clock, label: "Ready in", value: time && `${time.minDays}–${time.maxDays} days` },
+    ];
+  } else if (isSilver(p)) {
+    specs = [
+      { Icon: Sparkles, label: "Metal", value: "Silver" },
+      { Icon: Scale, label: "Weight", value: p.weightInTola && `${p.weightInTola} tola` },
+    ];
+  } else if (p.productType === "gold") {
+    specs = [
+      { Icon: Gem, label: "Gold finish", value: label(p.goldFinish) },
+      { Icon: Layers, label: "Plating", value: label(p.platingMethod) },
+      { Icon: Hammer, label: "Base metal", value: capitalize(p.baseMetal) },
+      { Icon: Scale, label: "Weight", value: p.weightInKg && `${p.weightInKg} kg` },
+    ];
+  } else {
+    specs = [
+      { Icon: Hammer, label: "Material", value: capitalize(p.metal) },
+      { Icon: Sparkles, label: "Finish", value: capitalize(p.finish) },
+      { Icon: Scale, label: "Weight", value: p.weightInKg && `${p.weightInKg} kg` },
     ];
   }
-  if (p.productType === "gold") {
-    return [
-      { Icon: Gem, label: "Finish", value: label(p.goldFinish) || "—" },
-      p.platingMethod
-        ? { Icon: Sparkles, label: "Plating", value: label(p.platingMethod) }
-        : { Icon: Hammer, label: "Base metal", value: capitalize(p.baseMetal) || "—" },
-      height ? { Icon: Ruler, label: "Height", value: height } : { Icon: Package, label: "Availability", value: p.stockQuantity > 0 ? `${p.stockQuantity} in stock` : "Ask us" },
-    ];
-  }
-  return [
-    { Icon: Hammer, label: "Material", value: capitalize(p.metal) || "—" },
-    { Icon: Sparkles, label: "Finish", value: capitalize(p.finish) || "—" },
-    height
-      ? { Icon: Ruler, label: "Height", value: height }
-      : { Icon: Scale, label: "Weight", value: p.weightInKg ? `${p.weightInKg} kg` : "—" },
-  ];
+  // Width and length sit next to the featured height
+  const dims = p.dimensions || {};
+  const unit = dims.unit || "inch";
+  if (dims.width) specs.push({ Icon: Ruler, label: "Width", value: formatLength(dims.width, unit) });
+  if (dims.length) specs.push({ Icon: Ruler, label: "Length", value: formatLength(dims.length, unit) });
+  return specs.filter((s) => s.value);
+}
+
+// Today's silver or gold rate, shown with the price
+function MetalRate({ metal, rate, formatMoney }) {
+  const change = describeChange(rate.dailyChange, formatMoney);
+  const Icon = change.direction === "down" ? TrendingDown : TrendingUp;
+  return (
+    <div className={`wc-rate wc-rate-${metal}`}>
+      <div className="min-w-0">
+        <div className="wc-rate-label">Today's {metal} rate</div>
+        <div className="wc-rate-value">
+          {formatMoney(rate.pricePerTola)} <span>/ tola</span>
+        </div>
+      </div>
+      <div className="text-right">
+        <span className={`wc-rate-change ${change.direction === "up" ? "wc-up" : change.direction === "down" ? "wc-down" : ""}`}>
+          {change.direction !== "flat" && <Icon size={12} />}
+          {change.text}
+        </span>
+        {rate.lastScrapedAt && <div className="wc-rate-date">Updated {new Date(rate.lastScrapedAt).toLocaleDateString()}</div>}
+      </div>
+    </div>
+  );
 }
 
 const SingleProductPage = () => {
@@ -111,6 +136,8 @@ const SingleProductPage = () => {
   const [specErrors, setSpecErrors] = useState({});
   // Bumped to reset the custom form (and its design dropdown)
   const [specFormKey, setSpecFormKey] = useState(0);
+  // Today's silver / gold rate for silver and gold products
+  const [metalRate, setMetalRate] = useState(null);
 
   const sessionId = ApiService.getSessionId();
 
@@ -148,9 +175,26 @@ const SingleProductPage = () => {
     };
   }, [id]);
 
+  const productType = product?.productType;
+  useEffect(() => {
+    setMetalRate(null);
+    const fetchRate =
+      productType === "silver" ? ApiService.getTodaysSilverPrice : productType === "gold" ? ApiService.getTodaysGoldPrice : null;
+    if (!fetchRate) return;
+    let cancelled = false;
+    fetchRate
+      .call(ApiService)
+      .then((rate) => {
+        if (!cancelled && rate?.pricePerTola != null) setMetalRate(rate);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [id, productType]);
+
   const custom = isCustomSilver(product);
   const images = productImages(product);
-  const options = product?.customOptions || {};
   const silverRate = product?.pricing?.silverRate;
 
   // Unit price: fixed / stock silver from the API, custom silver from the chosen weight
@@ -284,13 +328,16 @@ const SingleProductPage = () => {
     );
   }
 
-  const dims = product.dimensions || {};
-  const dimensionText = [dims.height && `H ${dims.height}`, dims.width && `W ${dims.width}`, dims.length && `L ${dims.length}`]
-    .filter(Boolean)
-    .join(" × ");
-  const time = options.productionTime;
-  const tiles = summaryTiles(product);
-  const priceBadge = custom ? "Made to order" : isSilver(product) ? "Live silver price" : "Fixed price";
+  const specs = specList(product);
+  const height = productHeight(product);
+  const inStock = isInStock(product);
+  const showTotal = showsTotal(product);
+  const totalText =
+    unitPrice != null
+      ? formatMoney(unitPrice * quantity)
+      : custom && product.pricing?.priceRange
+      ? `${formatMoney(product.pricing.priceRange.min)} – ${formatMoney(product.pricing.priceRange.max)}`
+      : null;
 
   return (
     <div className="wc-page wc-pd min-h-screen">
@@ -340,8 +387,6 @@ const SingleProductPage = () => {
               images={images.length ? images : [productImage(product)]}
               canZoom={images.length > 0}
               title={product.title}
-              chip={product.category?.name}
-              badge={isSilver(product) ? (custom ? "Made to order" : "Live price") : null}
               onShare={handleShare}
             />
           </div>
@@ -356,56 +401,121 @@ const SingleProductPage = () => {
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl leading-tight">{product.title}</h1>
-              {variantLabel(product) && (
-                <p className="wc-pd-subtitle mt-2">
-                  <Hammer size={14} style={{ color: "var(--wc-gold-deep)" }} />
-                  {[product.category?.name, variantLabel(product)].filter(Boolean).join(" · ")}
-                </p>
-              )}
+              <p className={`wc-stock mt-3 ${inStock ? "wc-in-stock" : "wc-out-of-stock"}`}>
+                <span aria-hidden="true" />
+                {inStock ? "In stock" : "Out of stock"}
+              </p>
             </div>
 
-            <div className="wc-tiles">
-              {tiles.map(({ Icon, label: name, value }) => (
-                <div key={name} className="wc-tile">
-                  <Icon size={16} />
-                  <div className="wc-tile-label">{name}</div>
-                  <div className="wc-tile-value">{value}</div>
-                </div>
-              ))}
-            </div>
+            {/* Specifications */}
+            {(height || specs.length > 0) && (
+              <section className="wc-specs" aria-labelledby="wc-specs-title">
+                <h2 id="wc-specs-title" className="wc-panel-title">
+                  Specifications
+                </h2>
+                {height && (
+                  <div className="wc-height">
+                    <div className="wc-height-icon" aria-hidden="true">
+                      <Ruler size={22} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="wc-height-label">{height.range ? "Available heights" : "Height"}</div>
+                      <div className="wc-height-value">
+                        {formatLength(height.value, height.unit)}
+                        <span>≈ {formatLength(height.value, height.unit, { other: true })}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {specs.length > 0 && (
+                  <dl className="wc-spec-grid">
+                    {specs.map(({ Icon, label: name, value }) => (
+                      <div key={name} className="wc-spec">
+                        <Icon size={15} aria-hidden="true" />
+                        <dt>{name}</dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </section>
+            )}
 
             {/* Price */}
-            <div className="wc-panel">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                  <span className="wc-price-big">
-                    {unitPrice != null
-                      ? formatMoney(unitPrice * quantity)
-                      : custom && product.pricing?.priceRange
-                      ? `${formatMoney(product.pricing.priceRange.min)} – ${formatMoney(product.pricing.priceRange.max)}`
-                      : priceLabel(product, formatMoney)}
-                  </span>
-                  {quantity > 1 && unitPrice != null && (
-                    <span className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
-                      / {formatMoney(unitPrice)} each
-                    </span>
-                  )}
-                  {unitPrice != null && <NprEquivalent npr={unitPrice * quantity} className="basis-full text-sm" />}
-                </div>
-                <span className="wc-price-badge">{priceBadge}</span>
+            <div className="wc-panel space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="wc-panel-title">Price</h2>
+                <span className="wc-price-badge">
+                  <Handshake size={12} /> Negotiable
+                </span>
               </div>
-              <p className="text-sm mt-3" style={{ color: "var(--wc-ink-muted)" }}>
-                {isSilver(product) && silverRate
-                  ? `Today's silver rate ${formatMoney(silverRate)}/tola × weight, plus making charge ${formatMoney(product.makingCost)}. `
-                  : ""}
-                {isSilver(product) && !silverRate ? "Today's silver rate isn't available yet. " : ""}
-                {custom
-                  ? unitPrice != null
-                    ? "Estimate for the weight you chose; the final price is confirmed with you."
-                    : "The price depends on the weight you choose below."
-                  : "The final price and delivery are confirmed with you before you pay."}
-              </p>
-              <CurrencyDisclaimer className="mt-2" />
+
+              {metalRate && <MetalRate metal={productType} rate={metalRate} formatMoney={formatMoney} />}
+
+              {isSilver(product) ? (
+                <>
+                  {silverRate ? (
+                    <dl className="wc-breakdown">
+                      {/* The rate itself is in the card above when it loaded */}
+                      {!metalRate && (
+                        <div>
+                          <dt>Today's silver rate</dt>
+                          <dd>{formatMoney(silverRate)} / tola</dd>
+                        </div>
+                      )}
+                      <div>
+                        <dt>Weight</dt>
+                        <dd>
+                          {custom
+                            ? spec.preferredWeight
+                              ? `${spec.preferredWeight} tola (your choice)`
+                              : `${product.weightRange?.min}–${product.weightRange?.max} tola`
+                            : `${product.weightInTola} tola`}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>
+                          <Plus size={12} aria-hidden="true" /> Making charge
+                        </dt>
+                        <dd>{formatMoney(product.makingCost || 0)}</dd>
+                      </div>
+                      {showTotal && totalText && (
+                        <div className="wc-breakdown-total">
+                          <dt>{custom ? "Estimated total" : "Total"}</dt>
+                          <dd>
+                            {totalText}
+                            {unitPrice != null && <NprEquivalent npr={unitPrice * quantity} className="block text-xs font-normal" />}
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                  ) : (
+                    <p className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
+                      Today's silver rate isn't available yet. Making charge: {formatMoney(product.makingCost || 0)}.
+                    </p>
+                  )}
+                  <p className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
+                    Price = today's silver rate × weight + making charge. {custom ? "Choose your weight below; the" : "The"} final
+                    price is agreed with you before you pay.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <span className="wc-price-big">{totalText || priceLabel(product, formatMoney)}</span>
+                    {quantity > 1 && unitPrice != null && (
+                      <span className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
+                        / {formatMoney(unitPrice)} each
+                      </span>
+                    )}
+                    {unitPrice != null && <NprEquivalent npr={unitPrice * quantity} className="basis-full text-sm" />}
+                  </div>
+                  <p className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
+                    The final price and delivery are agreed with you before you pay.
+                  </p>
+                </>
+              )}
+              <CurrencyDisclaimer />
             </div>
 
             {/* Description */}
@@ -416,57 +526,12 @@ const SingleProductPage = () => {
               </p>
             </div>
 
-            {/* Specifications */}
-            <div className="wc-panel">
-              <h2 className="wc-panel-title mb-1">Specifications</h2>
-              <dl>
-                <SpecRow name="Category" value={product.category?.name} />
-                {product.productType === "gold" && (
-                  <>
-                    <SpecRow name="Gold finish" value={label(product.goldFinish)} />
-                    <SpecRow name="Plating" value={label(product.platingMethod)} />
-                    <SpecRow name="Base metal" value={capitalize(product.baseMetal)} />
-                  </>
-                )}
-                {product.productType === "metal" && (
-                  <>
-                    <SpecRow name="Material" value={capitalize(product.metal)} />
-                    <SpecRow name="Finish" value={capitalize(product.finish)} />
-                  </>
-                )}
-                {isSilver(product) && !custom && <SpecRow name="Weight" value={product.weightInTola && `${product.weightInTola} tola`} />}
-                {custom && (
-                  <>
-                    <SpecRow name="Weight range" value={`${product.weightRange?.min}–${product.weightRange?.max} tola`} />
-                    {options.sizeRange && (options.sizeRange.minHeight != null || options.sizeRange.maxHeight != null) && (
-                      <SpecRow
-                        name="Height range"
-                        value={`${options.sizeRange.minHeight ?? "—"}–${options.sizeRange.maxHeight ?? "—"} ${options.sizeRange.unit || "inch"}`}
-                      />
-                    )}
-                    {time && <SpecRow name="Production time" value={`${time.minDays}–${time.maxDays} days`} />}
-                  </>
-                )}
-                {isSilver(product) && <SpecRow name="Making charge" value={product.makingCost ? formatMoney(product.makingCost) : null} />}
-                <SpecRow name="Weight" value={product.weightInKg && `${product.weightInKg} kg`} />
-                <SpecRow name="Dimensions" value={dimensionText && `${dimensionText} ${dims.unit || "inch"}`} />
-                {!custom && product.stockQuantity > 0 && <SpecRow name="Availability" value={`${product.stockQuantity} in stock`} />}
-              </dl>
-            </div>
-
             {/* Custom silver order details */}
             {custom && (
               <div id="wc-custom-piece" className="wc-panel space-y-4" style={{ scrollMarginTop: "7rem" }}>
-                <div>
-                  <h2 className="wc-panel-title">
-                    <Sparkles size={14} /> Your custom piece
-                  </h2>
-                  {time && (
-                    <p className="text-sm flex items-center gap-1 mt-1" style={{ color: "var(--wc-ink-muted)" }}>
-                      <Clock size={14} /> Made to order in {time.minDays}–{time.maxDays} days
-                    </p>
-                  )}
-                </div>
+                <h2 className="wc-panel-title">
+                  <Sparkles size={14} /> Your custom piece
+                </h2>
                 <CustomPieceFields
                   key={`${product._id}-${specFormKey}`}
                   product={product}
@@ -494,7 +559,7 @@ const SingleProductPage = () => {
 
               <button onClick={handleAddToCart} disabled={addingToCart} className="wc-btn wc-btn-primary w-full" style={{ padding: "1rem 1.5rem" }}>
                 <ShoppingBag size={16} />
-                {addingToCart ? "Adding..." : `Add to cart${unitPrice != null ? ` · ${formatMoney(unitPrice * quantity)}` : ""}`}
+                {addingToCart ? "Adding..." : `Add to cart${showTotal && unitPrice != null ? ` · ${formatMoney(unitPrice * quantity)}` : ""}`}
               </button>
               <div className="grid grid-cols-2 gap-3">
                 {WHATSAPP_PHONE ? (

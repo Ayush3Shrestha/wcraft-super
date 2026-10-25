@@ -104,3 +104,96 @@
   font-size: 1.75rem;
   color: var(--wc-gold);
 }
+
+/* Card slider: one row of category / featured cards that scrolls sideways */
+.wc-cslider {
+  position: relative;
+  --wc-cslider-gap: 1.5rem;
+}
+.wc-cslider-track {
+  display: flex;
+  gap: var(--wc-cslider-gap);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  /* Room for the cards' hover lift and shadow */
+  padding: 0.5rem 0.25rem 1.25rem;
+  margin: -0.5rem -0.25rem -1.25rem;
+}
+.wc-cslider-track::-webkit-scrollbar {
+  display: none;
+}
+.wc-cslider-track:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* Phones: one card with the next one peeking in */
+.wc-cslider-item {
+  flex: 0 0 82%;
+  min-width: 0;
+  display: flex;
+  scroll-snap-align: start;
+}
+.wc-cslider-item > * {
+  flex: 1;
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .wc-cslider-item {
+    flex-basis: calc((100% - var(--wc-cslider-gap)) / 2);
+  }
+}
+@media (min-width: 1024px) {
+  .wc-cslider-3 .wc-cslider-item,
+  .wc-cslider-4 .wc-cslider-item {
+    flex-basis: calc((100% - 2 * var(--wc-cslider-gap)) / 3);
+  }
+}
+@media (min-width: 1280px) {
+  .wc-cslider-4 .wc-cslider-item {
+    flex-basis: calc((100% - 3 * var(--wc-cslider-gap)) / 4);
+  }
+}
+.wc-cslider-btn {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--wc-maroon);
+  color: var(--wc-marigold);
+  border: 2px solid var(--wc-marigold);
+  box-shadow: 0 8px 20px rgba(32, 28, 28, 0.3);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.wc-cslider-btn:hover {
+  background-color: var(--wc-crimson);
+  transform: translateY(-50%) scale(1.06);
+}
+.wc-cslider-btn:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 3px;
+}
+.wc-cslider-prev {
+  left: -0.75rem;
+}
+.wc-cslider-next {
+  right: -0.75rem;
+}
+@media (min-width: 1280px) {
+  .wc-cslider-prev {
+    left: -1.45rem;
+  }
+  .wc-cslider-next {
+    right: -1.45rem;
+  }
+}

@@ -216,40 +216,216 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.wc-pd-subtitle {
-  display: flex;
+/* Availability, right under the title */
+.wc-stock {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--wc-ink-muted);
+  gap: 0.45rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
-.wc-tiles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.6rem;
+.wc-stock span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: currentColor;
 }
-.wc-tile {
-  border-radius: 6px;
-  background-color: var(--wc-stone);
-  padding: 0.85rem 0.6rem;
-  text-align: center;
+.wc-in-stock {
+  background-color: rgba(22, 120, 60, 0.1);
+  color: #16703c;
 }
-.wc-tile svg {
-  margin: 0 auto 0.35rem;
+.wc-out-of-stock {
+  background-color: rgba(137, 13, 32, 0.08);
   color: var(--wc-crimson);
 }
-.wc-tile-label {
+
+/* Specifications card: featured height, then the other specs */
+.wc-specs {
+  border: 1px solid var(--wc-line);
+  border-radius: 10px;
+  background-color: #fff;
+  padding: 1.1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+.wc-height {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--wc-maroon), var(--wc-crimson));
+  color: var(--wc-on-dark);
+}
+.wc-height-icon {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(248, 208, 88, 0.16);
+  color: var(--wc-marigold);
+}
+.wc-height-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wc-marigold);
+}
+.wc-height-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.6rem;
+  font-family: var(--wc-font-serif);
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+.wc-height-value span {
+  font-family: var(--wc-font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--wc-on-dark-muted);
+}
+.wc-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+@media (min-width: 640px) {
+  .wc-spec-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.wc-spec {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.5rem;
+  align-items: center;
+  padding: 0.7rem 0.75rem;
+  border-radius: 6px;
+  background-color: var(--wc-stone);
+}
+.wc-spec svg {
+  grid-row: span 2;
+  color: var(--wc-crimson);
+}
+.wc-spec dt {
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--wc-ink-muted);
 }
-.wc-tile-value {
-  margin-top: 0.15rem;
-  font-size: 0.8rem;
+.wc-spec dd {
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--wc-ink);
+  overflow-wrap: anywhere;
+}
+
+/* Today's silver / gold rate inside the price panel */
+.wc-rate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--wc-rate-accent);
+  background-color: var(--wc-rate-bg);
+}
+.wc-rate-silver {
+  --wc-rate-accent: #9aa3ad;
+  --wc-rate-bg: #f1f3f5;
+}
+.wc-rate-gold {
+  --wc-rate-accent: var(--wc-gold);
+  --wc-rate-bg: rgba(248, 208, 88, 0.18);
+}
+.wc-rate-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-ink-muted);
+}
+.wc-rate-value {
+  font-family: var(--wc-font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--wc-ink);
+}
+.wc-rate-value span {
+  font-family: var(--wc-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wc-ink-muted);
+}
+.wc-rate-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--wc-ink-muted);
+}
+.wc-rate-change.wc-up {
+  color: #16703c;
+}
+.wc-rate-change.wc-down {
+  color: var(--wc-crimson);
+}
+.wc-rate-date {
+  font-size: 0.68rem;
+  color: var(--wc-ink-muted);
+}
+
+/* Silver price: rate + making charge, and the total when the admin shows it */
+.wc-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed var(--wc-line);
+  font-size: 0.9rem;
+}
+.wc-breakdown > div:last-child {
+  border-bottom: 0;
+}
+.wc-breakdown dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--wc-ink-muted);
+}
+.wc-breakdown dd {
+  text-align: right;
+  font-weight: 700;
+  color: var(--wc-ink);
+}
+.wc-breakdown .wc-breakdown-total {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--wc-line);
+  border-bottom: 0;
+}
+.wc-breakdown-total dt {
+  font-weight: 700;
+  color: var(--wc-ink);
+}
+.wc-breakdown-total dd {
+  font-family: var(--wc-font-serif);
+  font-size: 1.5rem;
+  color: var(--wc-maroon);
 }
 
 .wc-price-big {
@@ -260,6 +436,9 @@
   color: var(--wc-maroon);
 }
 .wc-price-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   background-color: rgba(248, 208, 88, 0.45);
@@ -270,26 +449,6 @@
   text-transform: uppercase;
   white-space: nowrap;
 }
-.wc-spec-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--wc-line);
-  font-size: 0.875rem;
-}
-.wc-spec-row:last-child {
-  border-bottom: 0;
-}
-.wc-spec-row dt {
-  color: var(--wc-ink-muted);
-}
-.wc-spec-row dd {
-  text-align: right;
-  font-weight: 600;
-  color: var(--wc-ink);
-}
-
 /* Light product cards for the related section */
 .wc-product-card.wc-light {
   background-color: var(--wc-maroon);
