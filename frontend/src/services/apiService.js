@@ -163,6 +163,51 @@ class ApiService {
     });
   }
 
+  // Blog API methods
+  static blogQuery(filters = {}) {
+    const params = new URLSearchParams();
+    ["topic", "search", "status", "page", "limit"].forEach((key) => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    if (filters.featured) params.append("featured", "true");
+    const query = params.toString();
+    return query ? `?${query}` : "";
+  }
+
+  // Published posts (shop)
+  static async getBlogPosts(filters = {}) {
+    return this.makeRequest(`/blogs${this.blogQuery(filters)}`);
+  }
+
+  static async getBlogTopics() {
+    return this.makeRequest("/blogs/topics");
+  }
+
+  static async getBlogPost(slug) {
+    return this.makeRequest(`/blogs/${encodeURIComponent(slug)}`);
+  }
+
+  // All posts including drafts (admin)
+  static async getAdminBlogPosts(filters = {}) {
+    return this.makeRequest(`/admin/blogs${this.blogQuery(filters)}`);
+  }
+
+  static async getAdminBlogPost(postId) {
+    return this.makeRequest(`/admin/blogs/${postId}`);
+  }
+
+  static async createBlogPost(formData) {
+    return this.makeRequest("/blogs", { method: "POST", body: formData });
+  }
+
+  static async updateBlogPost(postId, formData) {
+    return this.makeRequest(`/blogs/${postId}`, { method: "PUT", body: formData });
+  }
+
+  static async deleteBlogPost(postId) {
+    return this.makeRequest(`/blogs/${postId}`, { method: "DELETE" });
+  }
+
   // Silver Price API methods
   static async getTodaysSilverPrice() {
     return this.makeRequest("/silver/today");

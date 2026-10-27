@@ -16,6 +16,7 @@ const SOCIAL_ICONS = [
 
 const HELP_LINKS = [
   { label: "About us", to: "/about" },
+  { label: "Blog", to: "/blog" },
   { label: "Contact us", to: "/contact" },
   { label: "Your cart", to: "/cart" },
   { label: "Custom orders", to: "/contact" },

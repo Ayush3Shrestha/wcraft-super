@@ -35,6 +35,15 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024, files: MAX_PRODUCT_IMAGES },
 });
 
+// Most new images one blog post save can upload (cover + content images)
+const MAX_BLOG_UPLOADS = 20;
+
+const blogUpload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024, files: MAX_BLOG_UPLOADS },
+});
+
 // Turns a saved file into the path stored in the database
 const toPublicPath = (file) => `/uploads/${file.filename}`;
 
@@ -55,7 +64,7 @@ const removeStoredImages = (publicPaths = []) => {
 
 // Wrap a multer handler so upload errors return 400 JSON instead of a 500
 // HTML page, and so files from a rejected request don't stay on disk
-const handle = (middleware) => (req, res, next) =>
+const handle = (middleware, tooMany = `A product can have at most ${MAX_PRODUCT_IMAGES} images`) => (req, res, next) =>
   middleware(req, res, (err) => {
     res.on("finish", () => {
       if (res.statusCode >= 400) removeUploadedFiles(req);
@@ -65,7 +74,7 @@ const handle = (middleware) => (req, res, next) =>
       err.code === "LIMIT_FILE_SIZE"
         ? "Each image must be 5 MB or smaller"
         : err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE"
-        ? `A product can have at most ${MAX_PRODUCT_IMAGES} images`
+        ? tooMany
         : err.message;
     res.status(err.status || 400).json({ message });
   });
@@ -73,9 +82,11 @@ const handle = (middleware) => (req, res, next) =>
 module.exports = {
   UPLOAD_DIR,
   MAX_PRODUCT_IMAGES,
+  MAX_BLOG_UPLOADS,
   toPublicPath,
   removeUploadedFiles,
   removeStoredImages,
   productImages: handle(upload.array("images", MAX_PRODUCT_IMAGES)),
   categoryImage: handle(upload.single("image")),
+  blogImages: handle(blogUpload.array("images", MAX_BLOG_UPLOADS), `You can upload at most ${MAX_BLOG_UPLOADS} new images per save`),
 };

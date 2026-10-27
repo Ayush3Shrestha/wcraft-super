@@ -81,6 +81,7 @@ const navigationLinks = [
   { to: "/admin/products", label: "Products" },
   { to: "/admin/categories", label: "Categories" },
   { to: "/admin/orders", label: "Orders" },
+  { to: "/admin/blogs", label: "Blog" },
 ]
 
 const linkClass = (base, active, inactive) => ({ isActive }) =>

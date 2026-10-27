@@ -21,6 +21,10 @@ import ProductsList from './components/admin/ProductsList';
 import CategoriesList from './components/admin/CategoriesList';
 import OrdersList from './components/admin/OrdersList';
 import OrderForm from './components/admin/OrderForm';
+import BlogsList from './components/admin/BlogsList';
+import BlogForm from './components/admin/BlogForm';
+import BlogPage from './components/BlogPage';
+import BlogPostPage from './components/BlogPostPage';
 
 function AppWrapper() {
   const location = useLocation();
@@ -49,6 +53,9 @@ function AppWrapper() {
           <Route path="orders" element={<OrdersList />} />
           <Route path="orders/new" element={<OrderForm />} />
           <Route path="orders/:orderId/edit" element={<OrderForm key="edit" />} />
+          <Route path="blogs" element={<BlogsList />} />
+          <Route path="blogs/new" element={<BlogForm />} />
+          <Route path="blogs/:postId/edit" element={<BlogForm key="edit" />} />
           <Route path="createprod" element={<Navigate to="/admin/products/new" replace />} />
           <Route path="*" element={<AdminComingSoon />} />
         </Route>
@@ -68,6 +75,8 @@ function AppWrapper() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
         </Routes>
       </main>
       <Footer />

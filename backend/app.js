@@ -15,6 +15,7 @@ const order = require("./src/Routes/orderRoute");
 const admin = require("./src/Routes/adminRoute");
 const cart = require("./src/Routes/cartRoute");
 const currency = require("./src/Routes/currencyRoute");
+const blog = require("./src/Routes/blogRoute");
 
 // Connect to database, then refresh silver/gold prices so a restart never
 // leaves stale rates waiting for the next scheduled run
@@ -37,6 +38,7 @@ app.use("/api", order);
 app.use("/api", admin);
 app.use("/api", cart);
 app.use("/api", currency);
+app.use("/api", blog);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
