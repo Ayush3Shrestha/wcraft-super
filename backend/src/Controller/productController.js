@@ -100,6 +100,46 @@ function buildProductFields(body, productType, materialType) {
   return clean(fields);
 }
 
+// Height filter buckets, in inches: lower bound included, upper excluded
+const HEIGHT_BUCKETS = {
+  "0-4": [0, 4],
+  "4-8": [4, 8],
+  "8-12": [8, 12],
+  "12+": [12, Infinity],
+};
+const CM_PER_INCH = 2.54;
+
+// MongoDB condition for products whose height falls in a bucket. Heights are
+// stored in inches or cm. Custom silver pieces match when the range of
+// heights they can be made in overlaps the bucket.
+function heightFilter(bucket) {
+  const [lo, hi] = HEIGHT_BUCKETS[bucket];
+  const between = (scale) => ({ $gte: lo * scale, ...(hi === Infinity ? {} : { $lt: hi * scale }) });
+  const below = (scale) => (hi === Infinity ? { $exists: true, $ne: null } : { $lt: hi * scale });
+
+  const fixedHeight = (isCm) => ({
+    "dimensions.unit": isCm ? "cm" : { $ne: "cm" },
+    "dimensions.height": between(isCm ? CM_PER_INCH : 1),
+  });
+
+  const size = "customOptions.sizeRange";
+  const customRange = (isCm) => {
+    const scale = isCm ? CM_PER_INCH : 1;
+    return {
+      silverType: "custom",
+      [`${size}.unit`]: isCm ? "cm" : { $ne: "cm" },
+      $and: [
+        // smallest size it can be made in is below the bucket's top...
+        { $or: [{ [`${size}.minHeight`]: below(scale) }, { [`${size}.minHeight`]: null, [`${size}.maxHeight`]: below(scale) }] },
+        // ...and the largest reaches the bucket's bottom
+        { $or: [{ [`${size}.maxHeight`]: { $gte: lo * scale } }, { [`${size}.maxHeight`]: null, [`${size}.minHeight`]: { $gte: lo * scale } }] },
+      ],
+    };
+  };
+
+  return { $or: [fixedHeight(false), fixedHeight(true), customRange(false), customRange(true)] };
+}
+
 const validationResponse = (res, error) =>
   res.status(400).json({
     message: "Product validation failed",
@@ -202,6 +242,7 @@ exports.getAllProducts = async (req, res) => {
       search,
       includeInactive,
       featured,
+      height,
       sort = "newest",
       minPrice,
       maxPrice,
@@ -217,6 +258,7 @@ exports.getAllProducts = async (req, res) => {
     }
 
     if (String(featured) === "true") filter.isFeatured = true;
+    if (height && HEIGHT_BUCKETS[height]) filter.$and = [...(filter.$and || []), heightFilter(height)];
 
     if (category) {
       filter.category = category;

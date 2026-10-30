@@ -14,6 +14,7 @@ export function describeChange(change, format) {
 
 // Today's silver or gold rate per tola, for dark backgrounds
 export default function LivePriceCard({ label, price }) {
+  
   const { format } = useCurrency();
   const change = describeChange(price.dailyChange, format);
   const Icon = change.direction === "down" ? TrendingDown : TrendingUp;

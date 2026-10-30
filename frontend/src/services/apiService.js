@@ -18,6 +18,8 @@ class ApiService {
         headers: {
           // Let the browser set the multipart boundary for FormData
           ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          // Required by the API's CSRF check on write requests
+          "X-Requested-With": "XMLHttpRequest",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...options.headers,
         },
@@ -66,6 +68,8 @@ class ApiService {
     if (filters.includeInactive) params.append("includeInactive", "true");
     // Only products marked as featured (home page)
     if (filters.featured) params.append("featured", "true");
+    // Height bucket in inches: "0-4", "4-8", "8-12" or "12+"
+    if (filters.height) params.append("height", filters.height);
     if (filters.limit) params.append("limit", filters.limit);
     if (filters.page) params.append("page", filters.page);
 
@@ -225,7 +229,7 @@ class ApiService {
   }
 
   static async manualSilverPriceScrape() {
-    return this.makeRequest("/silver/scrape", {
+    return this.makeRequest("/silver/update", {
       method: "POST",
     });
   }
@@ -246,7 +250,7 @@ class ApiService {
   }
 
   static async manualGoldPriceScrape() {
-    return this.makeRequest("/gold/scrape", {
+    return this.makeRequest("/gold/update", {
       method: "POST",
     });
   }

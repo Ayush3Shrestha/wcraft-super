@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { storeJsonLd, useSeo } from "../lib/seo";
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, MessageCircle, Send, CheckCircle, Navigation, Plus, Tag, User } from "lucide-react";
 import { SHOP, whatsappLink } from "../lib/shopInfo";
@@ -58,6 +59,12 @@ function InfoCard({ Icon, title, children }) {
 }
 
 const ContactPage = () => {
+  useSeo({
+    title: "Contact & Visit the Shop",
+    description: `Visit Welcome Craft on ${SHOP.addressLines.join(", ")}, or contact us about statues, custom silver orders and delivery. Open ${SHOP.hours}.`,
+    path: "/contact",
+    jsonLd: storeJsonLd(),
+  });
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);

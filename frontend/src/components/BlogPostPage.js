@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { SITE_URL, absoluteUrl, breadcrumbJsonLd, useSeo } from "../lib/seo";
 import { Link, useParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Clock, Share2 } from "lucide-react";
 import ApiService from "../services/apiService";
@@ -47,6 +48,37 @@ export default function BlogPostPage() {
       cancelled = true;
     };
   }, [slug]);
+
+  useSeo({
+    ready: !loading,
+    title: post ? post.title : "Story not found",
+    description: post?.summary,
+    image: post?.previewImage,
+    path: `/blog/${post?.slug || slug}`,
+    type: "article",
+    noindex: !post,
+    jsonLd: post
+      ? [
+          {
+            "@type": "BlogPosting",
+            headline: post.title,
+            description: post.summary,
+            image: post.previewImage ? [imageUrl(post.previewImage)] : undefined,
+            datePublished: post.publishedAt,
+            dateModified: post.updatedAt || post.publishedAt,
+            articleSection: post.topic,
+            author: { "@type": post.author?.kind === "user" ? "Person" : "Organization", name: post.author?.name || "Welcome Craft" },
+            publisher: { "@id": `${SITE_URL}/#store` },
+            mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
+          },
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ]),
+        ]
+      : null,
+  });
 
   const share = async () => {
     const url = window.location.href;
@@ -126,7 +158,7 @@ export default function BlogPostPage() {
 
         {cover && (
           <figure className="wc-blog-cover container mx-auto px-4 sm:px-6 mt-10">
-            <img src={cover} alt="" onError={fallbackToPlaceholder} />
+            <img src={cover} alt={post.title} onError={fallbackToPlaceholder} />
           </figure>
         )}
 

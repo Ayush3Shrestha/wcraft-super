@@ -54,7 +54,7 @@ exports.testScraping = async (req, res) => {
 };
 
 // Get latest price
-exports.getLatestPrice = async (req, res) => {
+exports. getLatestPrice = async (req, res) => {
   try {
     const latest = await SilverPrice.findOne().sort({ effectiveDate: -1 });
     if (!latest) {

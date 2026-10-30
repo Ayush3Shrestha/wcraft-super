@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSeo } from "../lib/seo";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Newspaper } from "lucide-react";
 import ApiService from "../services/apiService";
@@ -75,6 +76,14 @@ export default function BlogPage() {
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useSeo({
+    title: topic ? `${topic} | Blog` : "Blog: Stories from the Workshop",
+    description: topic
+      ? `Stories about ${topic.toLowerCase()} from Welcome Craft, artisans of Buddhist statues in Patan, Nepal.`
+      : "Stories from our workshop in Patan: how Buddhist statues are made, caring for silver, choosing a statue and the people behind the craft.",
+    path: `/blog${topic ? `?topic=${encodeURIComponent(topic)}` : ""}${page > 1 ? `${topic ? "&" : "?"}page=${page}` : ""}`,
+  });
 
   useEffect(() => {
     ApiService.getBlogPosts({ featured: true, limit: 5 })

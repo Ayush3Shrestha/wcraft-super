@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { storeJsonLd, useSeo, websiteJsonLd } from "../lib/seo";
 import { ArrowRight, Gem, Sparkles, Flame, Package } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ApiService from "../services/apiService";
@@ -36,6 +37,13 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
+
+  useSeo({
+    description:
+      "Handcrafted Buddhist statues and ornaments from Patan, Nepal: silver priced on today's rate, gold finishes, copper and bronze. Custom silver pieces made to order.",
+    path: "/",
+    jsonLd: [storeJsonLd(), websiteJsonLd()],
+  });
 
   useEffect(() => {
     const fetchData = async () => {

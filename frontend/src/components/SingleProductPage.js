@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { SITE_URL, absoluteUrl, breadcrumbJsonLd, useSeo } from "../lib/seo";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -96,25 +97,87 @@ function specList(p) {
   return specs.filter((s) => s.value);
 }
 
-// Today's silver or gold rate, shown with the price
+// Structured data for search engines. Silver pieces only list a price when
+// the admin shows the total; otherwise the page shows rate + making charge.
+function productJsonLd(p) {
+  const url = absoluteUrl(`/product/${p._id}`);
+  const pricing = p.pricing || {};
+  const availability = isInStock(p) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock";
+  let offers;
+  if (showsTotal(p)) {
+    const seller = { "@id": `${SITE_URL}/#store` };
+    if (pricing.price != null || p.constantPrice != null) {
+      offers = { "@type": "Offer", url, priceCurrency: "NPR", price: pricing.price ?? p.constantPrice, availability, seller };
+    } else if (pricing.priceRange) {
+      offers = { "@type": "AggregateOffer", url, priceCurrency: "NPR", lowPrice: pricing.priceRange.min, highPrice: pricing.priceRange.max, availability, seller };
+    }
+  }
+  const material = isSilver(p) ? "Silver" : p.productType === "metal" ? capitalize(p.metal) : capitalize(p.baseMetal) || undefined;
+  return [
+    {
+      "@type": "Product",
+      name: p.title,
+      description: p.description,
+      image: productImages(p),
+      sku: p._id,
+      category: p.category?.name,
+      material,
+      brand: { "@type": "Brand", name: "Welcome Craft" },
+      ...(offers ? { offers } : {}),
+    },
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Products", path: "/products" },
+      ...(p.category ? [{ name: p.category.name, path: `/products?category=${p.category._id}` }] : []),
+      { name: p.title, path: `/product/${p._id}` },
+    ]),
+  ];
+}
+
+// Today's silver or gold rate, as a small chip next to the stock badge
 function MetalRate({ metal, rate, formatMoney }) {
   const change = describeChange(rate.dailyChange, formatMoney);
   const Icon = change.direction === "down" ? TrendingDown : TrendingUp;
+  const updated = rate.lastScrapedAt ? `Updated ${new Date(rate.lastScrapedAt).toLocaleDateString()}` : undefined;
   return (
-    <div className={`wc-rate wc-rate-${metal}`}>
-      <div className="min-w-0">
-        <div className="wc-rate-label">Today's {metal} rate</div>
-        <div className="wc-rate-value">
-          {formatMoney(rate.pricePerTola)} <span>/ tola</span>
-        </div>
-      </div>
-      <div className="text-right">
-        <span className={`wc-rate-change ${change.direction === "up" ? "wc-up" : change.direction === "down" ? "wc-down" : ""}`}>
-          {change.direction !== "flat" && <Icon size={12} />}
+    <p className={`wc-rate-chip wc-rate-${metal}`} title={updated}>
+      <span className="wc-rate-label">{metal} today</span>
+      <strong>{formatMoney(rate.pricePerTola)}</strong>
+      <span className="wc-rate-unit">/ tola</span>
+      {change.direction !== "flat" && (
+        <span className={`wc-rate-change ${change.direction === "up" ? "wc-up" : "wc-down"}`}>
+          <Icon size={12} aria-hidden="true" />
           {change.text}
         </span>
-        {rate.lastScrapedAt && <div className="wc-rate-date">Updated {new Date(rate.lastScrapedAt).toLocaleDateString()}</div>}
+      )}
+      {updated && <span className="sr-only">, {updated}</span>}
+    </p>
+  );
+}
+
+// Silver price written out: rate × weight + making charge (= total)
+function SilverFormula({ rate, weight, weightNote, making, total, formatMoney }) {
+  const Term = ({ value, caption }) => (
+    <span className="wc-formula-term">
+      <span className="wc-formula-value">{value}</span>
+      <span className="wc-formula-caption">{caption}</span>
+    </span>
+  );
+  return (
+    <div className="wc-formula">
+      <div className="wc-formula-label">Today's silver rate × weight + making charge</div>
+      <div className="wc-formula-row">
+        <Term value={rate != null ? formatMoney(rate) : "—"} caption="silver rate / tola" />
+        <span className="wc-formula-op" aria-label="times">
+          ×
+        </span>
+        <Term value={weight} caption={weightNote} />
+        <span className="wc-formula-op" aria-label="plus">
+          +
+        </span>
+        <Term value={formatMoney(making)} caption="making charge" />
       </div>
+      {total}
     </div>
   );
 }
@@ -192,6 +255,17 @@ const SingleProductPage = () => {
       cancelled = true;
     };
   }, [id, productType]);
+
+  useSeo({
+    ready: !loading,
+    title: product && product.isActive !== false ? product.title : "Product not available",
+    description: product?.description,
+    image: product?.images?.[0],
+    path: `/product/${id}`,
+    type: "product",
+    noindex: !product || product.isActive === false,
+    jsonLd: product && product.isActive !== false ? productJsonLd(product) : null,
+  });
 
   const custom = isCustomSilver(product);
   const images = productImages(product);
@@ -401,10 +475,13 @@ const SingleProductPage = () => {
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl leading-tight">{product.title}</h1>
-              <p className={`wc-stock mt-3 ${inStock ? "wc-in-stock" : "wc-out-of-stock"}`}>
-                <span aria-hidden="true" />
-                {inStock ? "In stock" : "Out of stock"}
-              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <p className={`wc-stock ${inStock ? "wc-in-stock" : "wc-out-of-stock"}`}>
+                  <span aria-hidden="true" />
+                  {inStock ? "In stock" : "Out of stock"}
+                </p>
+                {metalRate && <MetalRate metal={productType} rate={metalRate} formatMoney={formatMoney} />}
+              </div>
             </div>
 
             {/* Specifications */}
@@ -450,53 +527,32 @@ const SingleProductPage = () => {
                 </span>
               </div>
 
-              {metalRate && <MetalRate metal={productType} rate={metalRate} formatMoney={formatMoney} />}
-
               {isSilver(product) ? (
                 <>
-                  {silverRate ? (
-                    <dl className="wc-breakdown">
-                      {/* The rate itself is in the card above when it loaded */}
-                      {!metalRate && (
-                        <div>
-                          <dt>Today's silver rate</dt>
-                          <dd>{formatMoney(silverRate)} / tola</dd>
+                  <SilverFormula
+                    rate={silverRate}
+                    weight={
+                      custom
+                        ? spec.preferredWeight || `${product.weightRange?.min}–${product.weightRange?.max}`
+                        : product.weightInTola
+                    }
+                    weightNote={custom ? (spec.preferredWeight ? "tola, your choice" : "tola, you choose") : "weight in tola"}
+                    making={product.makingCost || 0}
+                    formatMoney={formatMoney}
+                    total={
+                      showTotal &&
+                      totalText && (
+                        <div className="wc-formula-total">
+                          <span>{custom ? "Estimated total" : quantity > 1 ? `Total for ${quantity}` : "Total"}</span>
+                          <strong>= {totalText}</strong>
+                          {unitPrice != null && <NprEquivalent npr={unitPrice * quantity} className="basis-full text-right text-xs" />}
                         </div>
-                      )}
-                      <div>
-                        <dt>Weight</dt>
-                        <dd>
-                          {custom
-                            ? spec.preferredWeight
-                              ? `${spec.preferredWeight} tola (your choice)`
-                              : `${product.weightRange?.min}–${product.weightRange?.max} tola`
-                            : `${product.weightInTola} tola`}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>
-                          <Plus size={12} aria-hidden="true" /> Making charge
-                        </dt>
-                        <dd>{formatMoney(product.makingCost || 0)}</dd>
-                      </div>
-                      {showTotal && totalText && (
-                        <div className="wc-breakdown-total">
-                          <dt>{custom ? "Estimated total" : "Total"}</dt>
-                          <dd>
-                            {totalText}
-                            {unitPrice != null && <NprEquivalent npr={unitPrice * quantity} className="block text-xs font-normal" />}
-                          </dd>
-                        </div>
-                      )}
-                    </dl>
-                  ) : (
-                    <p className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
-                      Today's silver rate isn't available yet. Making charge: {formatMoney(product.makingCost || 0)}.
-                    </p>
-                  )}
+                      )
+                    }
+                  />
                   <p className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
-                    Price = today's silver rate × weight + making charge. {custom ? "Choose your weight below; the" : "The"} final
-                    price is agreed with you before you pay.
+                    {!silverRate && "Today's silver rate isn't available yet. "}
+                    {custom ? "Choose your weight below; the" : "The"} final price is agreed with you before you pay.
                   </p>
                 </>
               ) : (

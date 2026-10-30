@@ -41,7 +41,7 @@ export default function BlogCard({ post }) {
     <article className="wc-blog-card group">
       {src && (
         <Link to={url} className="wc-blog-card-photo" tabIndex={-1} aria-hidden="true">
-          <img src={src} alt="" loading="lazy" onError={fallbackToPlaceholder} />
+          <img src={src} alt={post.title} loading="lazy" decoding="async" onError={fallbackToPlaceholder} />
         </Link>
       )}
       <div className="wc-blog-meta">

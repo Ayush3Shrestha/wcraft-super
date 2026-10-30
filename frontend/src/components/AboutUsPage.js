@@ -1,4 +1,5 @@
 import React from "react";
+import { useSeo } from "../lib/seo";
 import { Link } from "react-router-dom";
 import { Users, Award, Heart, Sparkles, MapPin, Clock, MessageCircle, Package, Shield, Phone, ArrowRight, Navigation } from "lucide-react";
 import { SHOP, whatsappLink } from "../lib/shopInfo";
@@ -102,6 +103,12 @@ const SectionHeading = ({ eyebrow, title, accent, text, center = true }) => (
 );
 
 const AboutUsPage = () => {
+  useSeo({
+    title: "About Us: Artisans of Patan",
+    description:
+      "Welcome Craft is a family of artisans in Patan, Lalitpur, making Buddhist statues and ornaments by hand with traditional techniques passed down through generations.",
+    path: "/about",
+  });
   const chatUrl = whatsappLink("Hello! I'd like to know more about Welcome Craft and your Buddhist handicrafts.");
 
   return (

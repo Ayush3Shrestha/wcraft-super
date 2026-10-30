@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { breadcrumbJsonLd, useSeo } from "../lib/seo";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Search, X, List, LayoutGrid, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import ApiService from "../services/apiService";
@@ -7,6 +8,14 @@ import LivePriceCard from "./shop/LivePriceCard";
 import ProductTile from "./shop/ProductTile";
 import { convertToNpr, currencySymbol, useCurrency } from "../lib/currency";
 import "../styles/catalog.css";
+
+// Height filter, in inches (centimetre sizes are converted by the API)
+const HEIGHT_OPTIONS = [
+  { value: "0-4", label: "0–4 inch" },
+  { value: "4-8", label: "4–8 inch" },
+  { value: "8-12", label: "8–12 inch" },
+  { value: "12+", label: "12+ inch" },
+];
 
 const HEADER_IMAGE = `${process.env.PUBLIC_URL}/images/hero-tara.webp`;
 
@@ -41,6 +50,8 @@ const ProductsPage = () => {
   );
   const categoryNameParam = searchParams.get("categoryName");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  // Height bucket in inches ("0-4", "4-8", "8-12", "12+"), kept in the URL
+  const [height, setHeight] = useState(() => (HEIGHT_OPTIONS.some((o) => o.value === searchParams.get("height")) ? searchParams.get("height") : ""));
   // Price filter actually applied (set when "Apply" is pressed), in the
   // currency the visitor typed it in
   const [appliedPrice, setAppliedPrice] = useState({ min: "", max: "", currency });
@@ -54,6 +65,23 @@ const ProductsPage = () => {
   // Bumped by "Apply" so the price filter refetches
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const seoCategory = categories.find((c) => c._id === selectedCategory);
+  const seoPath = `/products${seoCategory ? `?category=${seoCategory._id}` : ""}`;
+  useSeo({
+    title: seoCategory ? `${seoCategory.name} | Handcrafted in Patan` : "Shop Buddhist Statues & Ornaments",
+    description: seoCategory?.description
+      ? `${seoCategory.description} Handcrafted in Patan, Nepal.`
+      : "Shop handcrafted Buddhist statues and ornaments in silver, gold finishes, copper and bronze, made by artisans in Patan, Lalitpur.",
+    path: seoPath,
+    noindex: Boolean(appliedSearch),
+    ready: !selectedCategory || Boolean(seoCategory) || categories.length > 0,
+    jsonLd: breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Products", path: "/products" },
+      ...(seoCategory ? [{ name: seoCategory.name, path: seoPath }] : []),
+    ]),
+  });
+
   // Searching from the navbar changes ?search= while this page is open
   useEffect(() => {
     setSearchTerm(searchParam);
@@ -64,7 +92,7 @@ const ProductsPage = () => {
   // Fetch data on component mount and when filters change
   useEffect(() => {
     fetchData();
-  }, [selectedCategory, sortBy, currentPage, appliedSearch, appliedPrice, refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedCategory, height, sortBy, currentPage, appliedSearch, appliedPrice, refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchCategories();
@@ -81,6 +109,7 @@ const ProductsPage = () => {
         sort: sortBy,
         search: appliedSearch.trim(),
         category: selectedCategory,
+        height,
         // Prices are stored in NPR
         minPrice: toNpr(appliedPrice.min, appliedPrice.currency, Math.floor),
         maxPrice: toNpr(appliedPrice.max, appliedPrice.currency, Math.ceil),
@@ -162,6 +191,14 @@ const ProductsPage = () => {
 
   const selectedCategoryName = categories.find((c) => c._id === selectedCategory)?.name;
 
+  const handleHeightFilter = (value) => {
+    setHeight(value);
+    setCurrentPage(1);
+    if (value) searchParams.set("height", value);
+    else searchParams.delete("height");
+    setSearchParams(searchParams);
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
@@ -172,6 +209,7 @@ const ProductsPage = () => {
 
   const clearFilters = () => {
     setSelectedCategory("");
+    setHeight("");
     setSearchTerm("");
     setAppliedSearch("");
     setPriceRange({ min: "", max: "" });
@@ -180,11 +218,13 @@ const ProductsPage = () => {
     searchParams.delete("categoryName");
     searchParams.delete("category");
     searchParams.delete("search");
+    searchParams.delete("height");
     setSearchParams(searchParams);
   };
 
   const activeFilters = [
     selectedCategoryName && { key: "category", label: selectedCategoryName, clear: () => handleCategoryFilter("") },
+    height && { key: "height", label: `Height ${HEIGHT_OPTIONS.find((o) => o.value === height)?.label}`, clear: () => handleHeightFilter("") },
     appliedSearch && {
       key: "search",
       label: `“${appliedSearch}”`,
@@ -312,6 +352,23 @@ const ProductsPage = () => {
                           {category.name}
                         </span>
                         {category.productCount !== undefined && <span className="wc-option-count">{category.productCount}</span>}
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="wc-filter-title">Height</legend>
+                <div className="space-y-1">
+                  {[{ value: "", label: "Any height" }, ...HEIGHT_OPTIONS].map((option) => {
+                    const selected = height === option.value;
+                    return (
+                      <label key={option.value || "any"} className={`wc-option ${selected ? "wc-selected" : ""}`}>
+                        <span className="flex items-center gap-3">
+                          <input type="radio" name="height" checked={selected} onChange={() => handleHeightFilter(option.value)} />
+                          {option.label}
+                        </span>
                       </label>
                     );
                   })}

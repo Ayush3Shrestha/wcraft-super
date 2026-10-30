@@ -332,51 +332,47 @@
   overflow-wrap: anywhere;
 }
 
-/* Today's silver / gold rate inside the price panel */
-.wc-rate {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
-  border-left: 4px solid var(--wc-rate-accent);
+/* Today's silver / gold rate: a chip next to the stock badge */
+.wc-rate-chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  border-left: 3px solid var(--wc-rate-accent);
   background-color: var(--wc-rate-bg);
+  font-size: 0.78rem;
+  color: var(--wc-ink);
 }
 .wc-rate-silver {
   --wc-rate-accent: #9aa3ad;
-  --wc-rate-bg: #f1f3f5;
+  --wc-rate-bg: #eceff2;
 }
 .wc-rate-gold {
   --wc-rate-accent: var(--wc-gold);
-  --wc-rate-bg: rgba(248, 208, 88, 0.18);
+  --wc-rate-bg: rgba(248, 208, 88, 0.22);
 }
-.wc-rate-label {
+.wc-rate-chip .wc-rate-label {
   font-size: 0.6rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--wc-ink-muted);
 }
-.wc-rate-value {
-  font-family: var(--wc-font-serif);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--wc-ink);
+.wc-rate-chip strong {
+  font-weight: 800;
 }
-.wc-rate-value span {
-  font-family: var(--wc-font-sans);
-  font-size: 0.75rem;
-  font-weight: 600;
+.wc-rate-unit {
+  font-size: 0.7rem;
   color: var(--wc-ink-muted);
 }
 .wc-rate-change {
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  font-size: 0.72rem;
+  gap: 0.15rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--wc-ink-muted);
 }
 .wc-rate-change.wc-up {
   color: #16703c;
@@ -384,45 +380,68 @@
 .wc-rate-change.wc-down {
   color: var(--wc-crimson);
 }
-.wc-rate-date {
-  font-size: 0.68rem;
-  color: var(--wc-ink-muted);
-}
 
-/* Silver price: rate + making charge, and the total when the admin shows it */
-.wc-breakdown > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px dashed var(--wc-line);
-  font-size: 0.9rem;
+/* Silver price written out as rate × weight + making charge */
+.wc-formula {
+  padding: 1rem 1.1rem;
+  border-radius: 8px;
+  border-left: 4px solid #9aa3ad;
+  background-color: #fff;
 }
-.wc-breakdown > div:last-child {
-  border-bottom: 0;
-}
-.wc-breakdown dt {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+.wc-formula-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--wc-ink-muted);
 }
-.wc-breakdown dd {
-  text-align: right;
-  font-weight: 700;
-  color: var(--wc-ink);
+.wc-formula-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.4rem 0.7rem;
+  margin-top: 0.6rem;
 }
-.wc-breakdown .wc-breakdown-total {
-  margin-top: 0.25rem;
+.wc-formula-term {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.wc-formula-value {
+  font-family: var(--wc-font-serif);
+  font-size: clamp(1.25rem, 4.5vw, 1.6rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--wc-maroon);
+  white-space: nowrap;
+}
+.wc-formula-caption {
+  margin-top: 0.15rem;
+  font-size: 0.66rem;
+  color: var(--wc-ink-muted);
+}
+.wc-formula-op {
+  font-family: var(--wc-font-serif);
+  font-size: clamp(1.1rem, 4vw, 1.4rem);
+  line-height: 1.3;
+  color: var(--wc-gold-deep);
+}
+.wc-formula-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin-top: 0.85rem;
   padding-top: 0.75rem;
   border-top: 2px solid var(--wc-line);
-  border-bottom: 0;
 }
-.wc-breakdown-total dt {
+.wc-formula-total span {
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--wc-ink);
 }
-.wc-breakdown-total dd {
+.wc-formula-total strong {
   font-family: var(--wc-font-serif);
   font-size: 1.5rem;
   color: var(--wc-maroon);

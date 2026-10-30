@@ -1,0 +1,145 @@
+/* Privacy Policy, Terms of Service and Refund Policy pages */
+
+.wc-legal {
+  background-color: var(--wc-ivory);
+}
+.wc-legal-head {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+  background-color: var(--wc-stone);
+  border-bottom: 1px solid var(--wc-line);
+}
+.wc-legal-updated {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wc-gold-deep);
+}
+.wc-legal-intro {
+  margin-top: 1rem;
+  max-width: 46rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--wc-ink-muted);
+}
+
+/* Table of contents: a sticky column on wide screens */
+.wc-legal-toc {
+  margin-bottom: 2.5rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--wc-line);
+  background-color: #fff;
+}
+@media (min-width: 1024px) {
+  .wc-legal-toc {
+    position: sticky;
+    top: 7rem;
+    align-self: start;
+    margin-bottom: 0;
+  }
+}
+.wc-legal-toc-title {
+  margin-bottom: 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wc-ink-muted);
+}
+.wc-legal-toc ol {
+  display: grid;
+  gap: 0.45rem;
+  counter-reset: toc;
+}
+.wc-legal-toc li {
+  counter-increment: toc;
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+.wc-legal-toc li::before {
+  content: counter(toc, decimal-leading-zero);
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--wc-gold-deep);
+}
+.wc-page .wc-legal-toc a {
+  color: var(--wc-ink);
+}
+.wc-page .wc-legal-toc a:hover {
+  color: var(--wc-crimson);
+}
+
+/* Policy text */
+.wc-legal-body section {
+  scroll-margin-top: 7rem;
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--wc-line);
+}
+.wc-legal-body section:last-of-type {
+  border-bottom: 0;
+}
+.wc-page .wc-legal-body h2 {
+  margin-bottom: 0.9rem;
+  font-size: 1.5rem;
+}
+.wc-legal-body p,
+.wc-legal-body li {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--wc-ink);
+}
+.wc-legal-body p + p,
+.wc-legal-body p + ul,
+.wc-legal-body ul + p {
+  margin-top: 0.9rem;
+}
+.wc-legal-body ul {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.wc-legal-body li::marker {
+  color: var(--wc-crimson);
+}
+.wc-page .wc-legal-body a {
+  font-weight: 600;
+  color: var(--wc-crimson);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.wc-legal-others {
+  padding: 1.25rem;
+  border-radius: 8px;
+  background-color: var(--wc-stone);
+}
+.wc-page .wc-legal-others .wc-legal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 9999px;
+  background-color: #fff;
+  border: 1px solid var(--wc-line);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--wc-maroon);
+  text-decoration: none;
+}
+.wc-page .wc-legal-others .wc-legal-chip:hover {
+  border-color: var(--wc-crimson);
+}
+.wc-legal-toc a:focus-visible,
+.wc-legal-chip:focus-visible {
+  outline: 2px solid var(--wc-crimson);
+  outline-offset: 2px;
+}

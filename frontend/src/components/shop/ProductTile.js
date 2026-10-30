@@ -8,6 +8,7 @@ import {
   isSilver,
   priceLabel,
   productImage,
+  showsTotal,
   variantLabel,
 } from "../../lib/productDisplay";
 
@@ -23,12 +24,14 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
   const custom = isCustomSilver(product);
   const row = layout === "row";
   const detailed = row || light;
+  // Silver without a shown total: the rate, with "+ making" on its own line
+  const rate = isSilver(product) && !showsTotal(product) ? product.pricing?.silverRate : null;
 
   return (
     <article className={`wc-product-card group ${crimson && !light ? "wc-crimson" : ""} ${light ? "wc-light" : ""} ${row ? "wc-row" : ""}`}>
       <div className="wc-product-photo">
         <Link to={url} tabIndex={-1} aria-hidden="true">
-          <img src={productImage(product)} onError={fallbackToPlaceholder} alt="" />
+          <img src={productImage(product)} onError={fallbackToPlaceholder} alt={product.title} loading="lazy" decoding="async" />
         </Link>
         {isSilver(product) && <span className="wc-tag">Live price</span>}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
@@ -47,14 +50,23 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
       </div>
       <div className="p-5 flex flex-col flex-1 min-w-0">
         <p className="wc-product-meta truncate">{[product.category?.name, variantLabel(product)].filter(Boolean).join(" · ")}</p>
-        <h3 className="text-lg leading-snug mt-1 mb-3">
+        <h3 className="wc-product-title text-lg leading-snug mt-1 mb-3">
           <Link to={url} className="hover:underline">
             {product.title}
           </Link>
         </h3>
         {detailed && product.description && <p className="wc-product-desc text-sm mb-4 line-clamp-2">{product.description}</p>}
         <div className="mt-auto flex items-center justify-between gap-2">
-          <span className="wc-product-price">{priceLabel(product, format)}</span>
+          <span className="wc-product-price">
+            {rate != null ? (
+              <>
+                {format(rate)}
+                <span className="wc-price-suffix">per tola × weight + making</span>
+              </>
+            ) : (
+              priceLabel(product, format)
+            )}
+          </span>
           {detailed ? (
             <button
               type="button"

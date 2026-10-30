@@ -165,6 +165,11 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {SHOP.name}. All rights reserved.
           </p>
+          <nav aria-label="Policies" className="wc-footer-legal flex flex-wrap justify-center gap-x-4 gap-y-1">
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Service</Link>
+            <Link to="/refund-policy">Refund Policy</Link>
+          </nav>
           <p style={{ color: "var(--wc-marigold)", letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 700, fontSize: "0.62rem" }}>
             Handcrafted in Patan, Nepal
           </p>
