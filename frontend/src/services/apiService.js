@@ -18,6 +18,8 @@ class ApiService {
         headers: {
           // Let the browser set the multipart boundary for FormData
           ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          // Required by the API's CSRF check on write requests
+          "X-Requested-With": "XMLHttpRequest",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...options.headers,
         },
@@ -64,6 +66,10 @@ class ApiService {
     if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
     // Hidden products are only returned when asked for (admin panel)
     if (filters.includeInactive) params.append("includeInactive", "true");
+    // Only products marked as featured (home page)
+    if (filters.featured) params.append("featured", "true");
+    // Height bucket in inches: "0-4", "4-8", "8-12" or "12+"
+    if (filters.height) params.append("height", filters.height);
     if (filters.limit) params.append("limit", filters.limit);
     if (filters.page) params.append("page", filters.page);
 
@@ -161,6 +167,51 @@ class ApiService {
     });
   }
 
+  // Blog API methods
+  static blogQuery(filters = {}) {
+    const params = new URLSearchParams();
+    ["topic", "search", "status", "page", "limit"].forEach((key) => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    if (filters.featured) params.append("featured", "true");
+    const query = params.toString();
+    return query ? `?${query}` : "";
+  }
+
+  // Published posts (shop)
+  static async getBlogPosts(filters = {}) {
+    return this.makeRequest(`/blogs${this.blogQuery(filters)}`);
+  }
+
+  static async getBlogTopics() {
+    return this.makeRequest("/blogs/topics");
+  }
+
+  static async getBlogPost(slug) {
+    return this.makeRequest(`/blogs/${encodeURIComponent(slug)}`);
+  }
+
+  // All posts including drafts (admin)
+  static async getAdminBlogPosts(filters = {}) {
+    return this.makeRequest(`/admin/blogs${this.blogQuery(filters)}`);
+  }
+
+  static async getAdminBlogPost(postId) {
+    return this.makeRequest(`/admin/blogs/${postId}`);
+  }
+
+  static async createBlogPost(formData) {
+    return this.makeRequest("/blogs", { method: "POST", body: formData });
+  }
+
+  static async updateBlogPost(postId, formData) {
+    return this.makeRequest(`/blogs/${postId}`, { method: "PUT", body: formData });
+  }
+
+  static async deleteBlogPost(postId) {
+    return this.makeRequest(`/blogs/${postId}`, { method: "DELETE" });
+  }
+
   // Silver Price API methods
   static async getTodaysSilverPrice() {
     return this.makeRequest("/silver/today");
@@ -178,7 +229,7 @@ class ApiService {
   }
 
   static async manualSilverPriceScrape() {
-    return this.makeRequest("/silver/scrape", {
+    return this.makeRequest("/silver/update", {
       method: "POST",
     });
   }
@@ -199,7 +250,7 @@ class ApiService {
   }
 
   static async manualGoldPriceScrape() {
-    return this.makeRequest("/gold/scrape", {
+    return this.makeRequest("/gold/update", {
       method: "POST",
     });
   }

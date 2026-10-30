@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useSeo } from "../lib/seo";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ShoppingCart,
@@ -40,6 +41,7 @@ export function specSummary(spec) {
 }
 
 const CartPage = () => {
+  useSeo({ title: "Your cart", noindex: true });
   const { format: formatMoney } = useCurrency();
   const navigate = useNavigate();
   const [cart, setCart] = useState(null);

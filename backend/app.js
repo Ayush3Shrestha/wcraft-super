@@ -4,7 +4,8 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const connectDB = require("./src/Config/db");
-require("./src/Services/cron");
+const { runStartupPriceUpdate } = require("./src/Services/cron");
+const { corsOptions, csrfProtection } = require("./src/Middleware/securityMiddleware");
 
 // Import routes
 const silverPrice = require("./src/Routes/silverPriceRoute");
@@ -15,12 +16,20 @@ const order = require("./src/Routes/orderRoute");
 const admin = require("./src/Routes/adminRoute");
 const cart = require("./src/Routes/cartRoute");
 const currency = require("./src/Routes/currencyRoute");
+const blog = require("./src/Routes/blogRoute");
+const sitemap = require("./src/Routes/sitemapRoute");
 
-// Connect to database
-connectDB();
+// Connect to database, then refresh silver/gold prices so a restart never
+// leaves stale rates waiting for the next scheduled run
+connectDB().then(() => runStartupPriceUpdate());
 
 // Middleware
-app.use(cors());
+app.disable("x-powered-by");
+// Only the shop's own sites may call the API from a browser (CORS_ORIGINS /
+// SITE_URL; any localhost port in development)
+app.use(cors(corsOptions));
+// Write requests need the shop's custom header and an allowed origin
+app.use(csrfProtection);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,6 +45,11 @@ app.use("/api", order);
 app.use("/api", admin);
 app.use("/api", cart);
 app.use("/api", currency);
+app.use("/api", blog);
+
+// Sitemap for search engines, at /sitemap.xml and /api/sitemap.xml
+app.use(sitemap);
+app.use("/api", sitemap);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

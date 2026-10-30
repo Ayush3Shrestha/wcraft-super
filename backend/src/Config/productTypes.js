@@ -44,6 +44,7 @@ function getProductSchemaSpec(materialType) {
     title: { type: "string", required: true },
     description: { type: "string", required: true },
     images: { type: "file[]", required: true },
+    isFeatured: { type: "boolean", default: false },
     dimensions: {
       height: { type: "number" },
       width: { type: "number" },
@@ -62,6 +63,7 @@ function getProductSchemaSpec(materialType) {
           ...common,
           silverType: { type: "enum", options: toOptions(SILVER_LISTING_TYPES), required: true },
           makingCost: { type: "number", required: true },
+          showTotalPrice: { type: "boolean", default: false },
         },
         variants: {
           stock: {

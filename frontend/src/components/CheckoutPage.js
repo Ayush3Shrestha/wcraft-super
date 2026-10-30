@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSeo } from "../lib/seo";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ShoppingCart,
@@ -51,6 +52,7 @@ function Field({ id, label, optional, error, hint, icon: Icon, children }) {
 }
 
 const CheckoutPage = () => {
+  useSeo({ title: "Checkout", noindex: true });
   const { format: formatMoney } = useCurrency();
   const navigate = useNavigate();
   const [cart, setCart] = useState(null);
@@ -344,6 +346,21 @@ const CheckoutPage = () => {
                 <p className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
                   Your order is sent to our team, who will contact you to confirm the details and final price and arrange payment and
                   delivery.
+                </p>
+                <p className="text-xs mt-2" style={{ color: "var(--wc-ink-muted)" }}>
+                  By placing an order you agree to our{" "}
+                  <Link to="/terms" className="underline">
+                    Terms of Service
+                  </Link>
+                  ,{" "}
+                  <Link to="/refund-policy" className="underline">
+                    Refund Policy
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="/privacy-policy" className="underline">
+                    Privacy Policy
+                  </Link>
+                  .
                 </p>
               </div>
             </section>

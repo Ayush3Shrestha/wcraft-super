@@ -36,6 +36,8 @@ const productSchema = new mongoose.Schema(
     dimensions: dimensionsSchema,
 
     isActive: { type: Boolean, default: true },
+    // Featured products are the ones shown on the home page
+    isFeatured: { type: Boolean, default: false, index: true },
   },
   {
     timestamps: true,
@@ -80,6 +82,8 @@ const customOptionsSchema = new mongoose.Schema(
 const silverProductSchema = new mongoose.Schema({
   silverType: { type: String, enum: SILVER_LISTING_TYPES, required: true },
   makingCost: { type: Number, min: 0, required: true },
+  // The shop shows today's rate + making charge; this also shows their total
+  showTotalPrice: { type: Boolean, default: false },
 
   // stock
   weightInTola: { type: Number, min: 0 },

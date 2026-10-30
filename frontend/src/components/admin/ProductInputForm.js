@@ -48,6 +48,10 @@ const BASE_METALS = [
   { value: "bronze", label: "Bronze" },
   { value: "brass", label: "Brass" },
 ]
+const SHOWCASE_OPTIONS = [
+  { value: "normal", label: "Normal" },
+  { value: "featured", label: "Featured (shown on the home page)" },
+]
 const UNITS = [
   { value: "inch", label: "inch" },
   { value: "cm", label: "cm" },
@@ -65,6 +69,7 @@ const EMPTY_VALUES = {
   // silver
   silverType: "",
   makingCost: "",
+  showTotalPrice: false,
   weightInTola: "",
   stockQuantity: "",
   weightMin: "",
@@ -83,6 +88,7 @@ const EMPTY_VALUES = {
   weightInKg: "",
   finish: "",
   isActive: true,
+  showcase: "normal",
 }
 
 const str = (v) => (v === undefined || v === null ? "" : String(v))
@@ -103,6 +109,7 @@ function productToValues(p) {
     unit: dims.unit || opts.sizeRange?.unit || "inch",
     silverType: p.silverType || "",
     makingCost: str(p.makingCost),
+    showTotalPrice: p.showTotalPrice === true,
     weightInTola: str(p.weightInTola),
     stockQuantity: str(p.stockQuantity),
     weightMin: str(p.weightRange?.min),
@@ -120,6 +127,7 @@ function productToValues(p) {
     weightInKg: str(p.weightInKg),
     finish: p.finish || "",
     isActive: p.isActive !== false,
+    showcase: p.isFeatured ? "featured" : "normal",
   }
 }
 
@@ -211,10 +219,12 @@ function toFormData(values, materialType, images) {
   add("length", values.length)
   add("unit", values.unit)
   fd.append("isActive", String(values.isActive !== false))
+  fd.append("isFeatured", String(values.showcase === "featured"))
 
   if (materialType === "silver") {
     add("silverType", values.silverType)
     add("makingCost", values.makingCost)
+    fd.append("showTotalPrice", String(values.showTotalPrice === true))
     if (values.silverType === "stock") {
       add("weightInTola", values.weightInTola)
       add("stockQuantity", values.stockQuantity)
@@ -501,11 +511,26 @@ export default function ProductInputForm() {
 
                     <ProductImagesField items={images} onChange={setImages} />
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <TextField control={control} name="height" label="Height" type="number" step="any" />
-                      <TextField control={control} name="width" label="Width" type="number" step="any" />
-                      <TextField control={control} name="length" label="Length" type="number" step="any" />
-                      <SelectField control={control} name="unit" label="Unit" options={UNITS} />
+                    <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-4 space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <TextField
+                          control={control}
+                          name="height"
+                          label="Height"
+                          type="number"
+                          step="any"
+                          description={
+                            materialType === "silver" && silverType === "custom"
+                              ? "Featured on the product page. For custom pieces the height range below is shown when set."
+                              : "Featured at the top of the product page's specifications."
+                          }
+                        />
+                        <SelectField control={control} name="unit" label="Unit" options={UNITS} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <TextField control={control} name="width" label="Width (optional)" type="number" step="any" />
+                        <TextField control={control} name="length" label="Length (optional)" type="number" step="any" />
+                      </div>
                     </div>
                   </Section>
 
@@ -518,11 +543,30 @@ export default function ProductInputForm() {
                         <SelectField control={control} name="silverType" label="Listing type" options={SILVER_TYPES} />
                         <TextField control={control} name="makingCost" label="Making cost (Rs)" type="number" step="any" />
                       </div>
+                      <FormField
+                        control={control}
+                        name="showTotalPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex items-start gap-3 rounded-md border p-4">
+                              <FormControl>
+                                <Switch checked={field.value} onCheckedChange={field.onChange} className="mt-1" />
+                              </FormControl>
+                              <div className="grid gap-1">
+                                <Label className="font-medium">Show total price</Label>
+                                <p className="text-muted-foreground text-xs">
+                                  The shop always shows today's rate and the making charge. Turn on to also show their added total.
+                                </p>
+                              </div>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
                       {silverType === "stock" && (
                         <div className="grid sm:grid-cols-2 gap-4">
                           <TextField control={control} name="weightInTola" label="Weight (tola)" type="number" step="any" />
-                          <TextField control={control} name="stockQuantity" label="Stock quantity" type="number" />
+                          <TextField control={control} name="stockQuantity" label="Stock quantity" type="number" description="0 shows the product as out of stock." />
                         </div>
                       )}
 
@@ -585,7 +629,7 @@ export default function ProductInputForm() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <TextField control={control} name="weightInKg" label="Weight (kg, optional)" type="number" step="any" />
-                        <TextField control={control} name="stockQuantity" label="Stock quantity" type="number" />
+                        <TextField control={control} name="stockQuantity" label="Stock quantity" type="number" description="0 shows the product as out of stock." />
                       </div>
                     </Section>
                   )}
@@ -598,10 +642,18 @@ export default function ProductInputForm() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <TextField control={control} name="finish" label="Finish (optional)" placeholder="e.g. antique, polished" />
-                        <TextField control={control} name="stockQuantity" label="Stock quantity" type="number" />
+                        <TextField control={control} name="stockQuantity" label="Stock quantity" type="number" description="0 shows the product as out of stock." />
                       </div>
                     </Section>
                   )}
+
+                  <SelectField
+                    control={control}
+                    name="showcase"
+                    label="Home page showcase"
+                    options={SHOWCASE_OPTIONS}
+                    description="Featured products appear in the Handpicked Treasures section of the home page."
+                  />
 
                   <FormField
                     control={control}

@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../Middleware/authMiddleware");
 const controller = require("../Controller/goldPriceController");
 const { fetchAndSavePrice } = require("../Controller/goldPriceController");
 
 // Manual trigger to fetch & save gold price
-exports.updateGold = router.post("/gold/update", async (req, res) => {
+exports.updateGold = router.post("/gold/update", authMiddleware, async (req, res) => {
   try {
     const result = await fetchAndSavePrice();
     res.status(200).json({ message: "gold price updated", result });
@@ -15,7 +16,7 @@ exports.updateGold = router.post("/gold/update", async (req, res) => {
 
 
 
-router.get("/gold/test-scrape", controller.testScraping);
+router.get("/gold/test-scrape", authMiddleware, controller.testScraping);
 router.get("/gold/today", controller.getLatestPrice);
 router.get("/gold/history", controller.getPriceHistory);
 

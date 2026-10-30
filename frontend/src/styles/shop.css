@@ -164,10 +164,37 @@
 }
 
 .wc-product-card .wc-product-price {
+  min-width: 0;
   font-family: var(--wc-font-serif);
   font-weight: 700;
   font-size: 1.15rem;
+  line-height: 1.2;
   color: var(--wc-on-dark);
+  overflow-wrap: anywhere;
+}
+/* "per tola × weight + making" under a silver rate */
+.wc-product-card .wc-price-suffix {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: var(--wc-font-sans);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+}
+/* Long names stop at two lines instead of stretching the card */
+.wc-product-card .wc-product-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+/* Buttons and links next to the price never wrap */
+.wc-product-card .wc-product-link,
+.wc-product-card .wc-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .wc-product-card .wc-product-link {

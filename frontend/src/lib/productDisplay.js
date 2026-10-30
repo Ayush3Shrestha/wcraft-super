@@ -58,17 +58,52 @@ const capitalize = (v) => (v ? v[0].toUpperCase() + v.slice(1) : "");
 // e.g. "Full Gold · Fire Gold Plated"
 export function variantLabel(p) {
   if (!p) return "";
-  if (isCustomSilver(p)) return "Made to order";
+  if (isCustomSilver(p)) return "Custom size";
   if (isSilver(p)) return p.weightInTola ? `${p.weightInTola} tola` : "Ready made";
   if (p.productType === "gold") return [label(p.goldFinish), p.platingMethod && label(p.platingMethod)].filter(Boolean).join(" · ");
   if (p.productType === "metal") return capitalize(p.finish);
   return "";
 }
 
+// Silver is priced as today's rate + making charge; the total is only shown
+// when the admin turns on "Show total price" for the product
+export const showsTotal = (p) => !isSilver(p) || p?.showTotalPrice === true;
+
+// Custom pieces are made when ordered, so they're always available
+export const isInStock = (p) => isCustomSilver(p) || Number(p?.stockQuantity) > 0;
+
+const UNIT_SHORT = { inch: "in", cm: "cm" };
+const trimNumber = (n) => String(Math.round(n * 10) / 10);
+
+// "12 in", "8–14 in"; `other` gives the same size in the other unit
+export function formatLength(value, unit = "inch", { other = false } = {}) {
+  const values = (Array.isArray(value) ? value : [value]).filter((v) => v != null && v !== "");
+  if (!values.length) return "";
+  const text = (vals, u) => `${vals.map((v) => trimNumber(Number(v))).join("–")} ${UNIT_SHORT[u] || u}`;
+  if (!other) return text(values, unit);
+  return unit === "cm" ? text(values.map((v) => v / 2.54), "inch") : text(values.map((v) => v * 2.54), "cm");
+}
+
+// The height to feature for a product: its own height, or for custom
+// pieces the range of heights the workshop can make
+export function productHeight(p) {
+  const size = p?.customOptions?.sizeRange;
+  if (isCustomSilver(p) && size && (size.minHeight != null || size.maxHeight != null)) {
+    const range = [...new Set([size.minHeight, size.maxHeight].filter((v) => v != null))];
+    return { value: range, unit: size.unit || "inch", range: range.length > 1 };
+  }
+  const dims = p?.dimensions || {};
+  if (dims.height == null || dims.height === "") return null;
+  return { value: [dims.height], unit: dims.unit || "inch", range: false };
+}
+
 // Price text for product cards, using the pricing block the API returns.
 // `format` turns an NPR amount into text (the visitor's currency by default).
 export function priceLabel(p, format = formatMoney) {
   const pricing = p?.pricing;
+  if (isSilver(p) && !showsTotal(p)) {
+    return pricing?.silverRate != null ? `${format(pricing.silverRate)}/tola + making` : "Price on request";
+  }
   if (pricing?.price != null) return format(pricing.price);
   if (pricing?.priceRange) return `From ${format(pricing.priceRange.min)}`;
   if (p?.constantPrice != null) return format(p.constantPrice);
