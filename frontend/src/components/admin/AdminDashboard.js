@@ -502,7 +502,7 @@ const AdminDashboard = () => {
           <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
             <button
               onClick={() => navigate('/admin/products/new')}
-              className="btn btn-primary"
+              className="btn btn-secondary"
             >
               Add New Product
             </button>
@@ -525,10 +525,22 @@ const AdminDashboard = () => {
               Customer Management
             </button>
             <button
-              onClick={() => navigate('/admin/testimonials')}
+              onClick={() => navigate('/admin/testimonials/new')}
               className="btn btn-secondary"
             >
-              Manage Testimonials
+              Create Testimonials
+            </button>
+            <button
+              onClick={() => navigate('/admin/blogs/new')}
+              className="btn btn-secondary"
+            >
+              Create Blog Post
+            </button>
+            <button
+              onClick={() => navigate('/admin/announcements/new')}
+              className="btn btn-secondary"
+            >
+              Create Announcement
             </button>
           </div>
         </div>
