@@ -90,6 +90,11 @@ class ApiService {
     );
   }
 
+  // Includes a price hidden by "Price on request" (admin form)
+  static async getAdminProduct(productId) {
+    return this.makeRequest(`/admin/products/${productId}`);
+  }
+
   static async getProductById(productId) {
     return this.makeRequest(`/products/${productId}`);
   }
@@ -212,6 +217,77 @@ class ApiService {
     return this.makeRequest(`/blogs/${postId}`, { method: "DELETE" });
   }
 
+  // Customer API methods (admin)
+  static async getCustomers(filters = {}) {
+    const params = new URLSearchParams();
+    ["search", "sort", "page", "limit"].forEach((key) => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    const query = params.toString();
+    return this.makeRequest(`/admin/customers${query ? `?${query}` : ""}`);
+  }
+
+  static async getCustomer(customerId) {
+    return this.makeRequest(`/admin/customers/${customerId}`);
+  }
+
+  static async updateCustomerNotes(customerId, notes) {
+    return this.makeRequest(`/admin/customers/${customerId}/notes`, {
+      method: "PUT",
+      body: JSON.stringify({ notes }),
+    });
+  }
+
+  // Announcement API methods (the bar above the navbar)
+  static async getAnnouncements() {
+    return this.makeRequest("/announcements");
+  }
+
+  static async getAdminAnnouncements() {
+    return this.makeRequest("/admin/announcements");
+  }
+
+  static async createAnnouncement(text) {
+    return this.makeRequest("/announcements", { method: "POST", body: JSON.stringify({ text }) });
+  }
+
+  static async updateAnnouncement(id, changes) {
+    return this.makeRequest(`/announcements/${id}`, { method: "PUT", body: JSON.stringify(changes) });
+  }
+
+  static async reorderAnnouncements(ids) {
+    return this.makeRequest("/announcements/reorder", { method: "PUT", body: JSON.stringify({ ids }) });
+  }
+
+  static async deleteAnnouncement(id) {
+    return this.makeRequest(`/announcements/${id}`, { method: "DELETE" });
+  }
+
+  // Testimonial API methods
+  static async getTestimonials() {
+    return this.makeRequest("/testimonials");
+  }
+
+  static async getAdminTestimonials() {
+    return this.makeRequest("/admin/testimonials");
+  }
+
+  static async getAdminTestimonial(id) {
+    return this.makeRequest(`/admin/testimonials/${id}`);
+  }
+
+  static async createTestimonial(formData) {
+    return this.makeRequest("/testimonials", { method: "POST", body: formData });
+  }
+
+  static async updateTestimonial(id, formData) {
+    return this.makeRequest(`/testimonials/${id}`, { method: "PUT", body: formData });
+  }
+
+  static async deleteTestimonial(id) {
+    return this.makeRequest(`/testimonials/${id}`, { method: "DELETE" });
+  }
+
   // Silver Price API methods
   static async getTodaysSilverPrice() {
     return this.makeRequest("/silver/today");
@@ -326,8 +402,7 @@ class ApiService {
       return null;
     }
 
-    const silverCost = currentSilverPrice * product.weightInTola;
-    return silverCost + product.makingCost;
+    return (currentSilverPrice + product.makingCost) * product.weightInTola;
   }
 
   // Cart API methods

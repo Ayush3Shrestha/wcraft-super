@@ -81,7 +81,7 @@ export function validateCustomPiece(product, values) {
 export function estimateCustomPrice(product, values, silverRate) {
   const weight = Number(values.preferredWeight);
   if (!silverRate || !weight) return null;
-  return silverRate * weight + (product.makingCost || 0);
+  return (silverRate + (product.makingCost || 0)) * weight;
 }
 
 const labelClass = "block text-sm font-medium mb-1";

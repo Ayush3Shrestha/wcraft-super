@@ -18,7 +18,7 @@ import {
   StickyNote,
 } from "lucide-react";
 import ApiService from "../services/apiService";
-import { fallbackToPlaceholder, isCustomSilver, isSilver, productImage, variantLabel } from "../lib/productDisplay";
+import { PRICE_ON_REQUEST, fallbackToPlaceholder, isCustomSilver, isSilver, productImage, variantLabel } from "../lib/productDisplay";
 import { CustomPieceFields, estimateCustomPrice, specToValues, validateCustomPiece, valuesToSpec } from "./CustomPieceForm";
 import CheckoutSteps from "./shop/CheckoutSteps";
 import { CurrencyDisclaimer, NprEquivalent } from "./shop/CurrencyNote";
@@ -60,7 +60,7 @@ const CartPage = () => {
   const applyResponse = (res) => {
     setCart(res.cart);
     const msgs = [];
-    if (res.priceChanges?.length) msgs.push("Some prices were updated to today's silver rate.");
+    if (res.priceChanges?.length) msgs.push("Some prices in your cart were updated.");
     if (res.removedItems?.length) msgs.push(`Removed because no longer available: ${res.removedItems.join(", ")}.`);
     if (msgs.length) setNotices(msgs);
     window.dispatchEvent(new Event("storage")); // Update navbar cart count
@@ -226,6 +226,8 @@ const CartPage = () => {
   }
 
   const hasSilver = items.some((i) => isSilver(i.product));
+  const onRequestCount = items.filter((i) => i.priceSnapshot == null).length;
+  const allOnRequest = items.length > 0 && onRequestCount === items.length;
 
   return (
     <div className="wc-page wc-light-page min-h-screen">
@@ -420,11 +422,17 @@ const CartPage = () => {
                         </div>
 
                         <div className="text-right ml-auto">
-                          <div className="wc-line-price">{formatMoney(item.priceSnapshot * item.quantity)}</div>
-                          <div className="text-xs" style={{ color: "var(--wc-ink-muted)" }}>
-                            {formatMoney(item.priceSnapshot)} each
-                            {item.silverPriceSnapshot ? ` · silver ${formatMoney(item.silverPriceSnapshot)}/tola` : ""}
-                          </div>
+                          {item.priceSnapshot == null ? (
+                            <div className="wc-line-price">{PRICE_ON_REQUEST}</div>
+                          ) : (
+                            <>
+                              <div className="wc-line-price">{formatMoney(item.priceSnapshot * item.quantity)}</div>
+                              <div className="text-xs" style={{ color: "var(--wc-ink-muted)" }}>
+                                {formatMoney(item.priceSnapshot)} each
+                                {item.silverPriceSnapshot ? ` · silver ${formatMoney(item.silverPriceSnapshot)}/tola` : ""}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -455,7 +463,7 @@ const CartPage = () => {
                   <span>
                     Items ({cart.totalItems})
                   </span>
-                  <span style={{ color: "var(--wc-ink)" }}>{formatMoney(cart.subtotal)}</span>
+                  <span style={{ color: "var(--wc-ink)" }}>{allOnRequest ? PRICE_ON_REQUEST : formatMoney(cart.subtotal)}</span>
                 </div>
                 <div className="wc-summary-row">
                   <span>Delivery</span>
@@ -466,12 +474,19 @@ const CartPage = () => {
                 <span className="text-sm font-semibold" style={{ color: "var(--wc-ink)" }}>
                   Estimated total
                 </span>
-                <span className="wc-price-big">{formatMoney(cart.subtotal)}</span>
+                <span className="wc-price-big">{allOnRequest ? PRICE_ON_REQUEST : formatMoney(cart.subtotal)}</span>
               </div>
-              <div className="text-right">
-                <NprEquivalent npr={cart.subtotal} className="text-xs" />
-              </div>
-              <CurrencyDisclaimer className="mt-2" />
+              {!allOnRequest && (
+                <div className="text-right">
+                  <NprEquivalent npr={cart.subtotal} className="text-xs" />
+                </div>
+              )}
+              {onRequestCount > 0 && !allOnRequest && (
+                <p className="text-xs mt-2 text-right" style={{ color: "var(--wc-ink-muted)" }}>
+                  Plus {onRequestCount} {onRequestCount === 1 ? "item" : "items"} on request; we'll share the price before you pay.
+                </p>
+              )}
+              {!allOnRequest && <CurrencyDisclaimer className="mt-2" />}
               {hasSilver && (
                 <p className="text-xs mt-3" style={{ color: "var(--wc-ink-muted)" }}>
                   Silver pieces follow the daily silver rate. The final price is confirmed when we contact you.

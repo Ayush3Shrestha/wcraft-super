@@ -14,6 +14,9 @@ router.get("/products", productController.getAllProducts);
 // Get a single product by ID
 router.get("/products/:productId",productController.getProductById);
 
+// Get a product for editing, including a price hidden by "Price on request"
+router.get("/admin/products/:productId", authMiddleware, productController.getProductForAdmin);
+
 // Update a product
 router.put("/products/:productId", authMiddleware, productImages, productController.updateProduct);
 

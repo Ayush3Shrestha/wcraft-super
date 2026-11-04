@@ -19,6 +19,79 @@
   color: var(--wc-marigold);
 }
 
+/* Scrolling messages, like a news broadcast */
+.wc-ticker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.wc-ticker-window {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  /* Text fades in and out at the edges */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+}
+.wc-ticker-track {
+  display: flex;
+  width: max-content;
+}
+.wc-ticker-track.wc-running {
+  animation: wc-ticker-scroll linear infinite;
+}
+.wc-ticker-window:hover .wc-ticker-track {
+  animation-play-state: paused;
+}
+@keyframes wc-ticker-scroll {
+  to {
+    transform: translateX(var(--wc-ticker-shift));
+  }
+}
+.wc-ticker-group {
+  display: flex;
+  flex-shrink: 0;
+}
+.wc-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding-right: 2.5rem;
+  white-space: nowrap;
+}
+.wc-ticker-item strong {
+  font-weight: 800;
+  color: var(--wc-on-dark);
+}
+.wc-ticker-star {
+  margin-right: 0.35em;
+}
+.wc-ticker-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  font-weight: 700;
+}
+.wc-ticker-change.wc-up {
+  color: #9be8b4;
+}
+.wc-ticker-change.wc-down {
+  color: #ffb9ad;
+}
+/* No movement for people who ask for less: the first set, scrollable by hand */
+@media (prefers-reduced-motion: reduce) {
+  .wc-ticker-track.wc-running {
+    animation: none;
+  }
+  .wc-ticker-copy {
+    display: none;
+  }
+  .wc-ticker-window {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
 /* ---------- Main navigation ---------- */
 .wc-nav {
   background-color: var(--wc-nav);

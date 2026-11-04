@@ -89,6 +89,7 @@ const EMPTY_VALUES = {
   finish: "",
   isActive: true,
   showcase: "normal",
+  priceOnRequest: false,
 }
 
 const str = (v) => (v === undefined || v === null ? "" : String(v))
@@ -128,6 +129,7 @@ function productToValues(p) {
     finish: p.finish || "",
     isActive: p.isActive !== false,
     showcase: p.isFeatured ? "featured" : "normal",
+    priceOnRequest: p.priceOnRequest === true,
   }
 }
 
@@ -163,9 +165,13 @@ const productSchema = z
 
       ;["height", "width", "length"].forEach((f) => optionalNumber(f, f[0].toUpperCase() + f.slice(1)))
 
+      // A price is optional only when it's shown as "Price on request"
+      const onRequest = values.priceOnRequest && !(materialType === "silver" && values.silverType === "custom")
+      const priceNumber = onRequest ? optionalNumber : requireNumber
+
       if (materialType === "silver") {
         if (!values.silverType) issue("silverType", "Choose stock or custom")
-        requireNumber("makingCost", "Making cost")
+        priceNumber("makingCost", "Making cost")
 
         if (values.silverType === "stock") {
           requireNumber("weightInTola", "Weight")
@@ -189,7 +195,7 @@ const productSchema = z
       }
 
       if (materialType === "gold") {
-        requireNumber("constantPrice", "Price")
+        priceNumber("constantPrice", "Price")
         if (!values.goldFinish) issue("goldFinish", "Choose a gold finish")
         if (values.goldFinish === "full_gold" && !values.platingMethod)
           issue("platingMethod", "Choose electroplated or fire gold plated")
@@ -198,7 +204,7 @@ const productSchema = z
       }
 
       if (materialType === "copper" || materialType === "bronze") {
-        requireNumber("constantPrice", "Price")
+        priceNumber("constantPrice", "Price")
         optionalNumber("weightInKg", "Weight")
         optionalNumber("stockQuantity", "Stock quantity")
       }
@@ -220,6 +226,7 @@ function toFormData(values, materialType, images) {
   add("unit", values.unit)
   fd.append("isActive", String(values.isActive !== false))
   fd.append("isFeatured", String(values.showcase === "featured"))
+  fd.append("priceOnRequest", String(values.priceOnRequest === true && !(materialType === "silver" && values.silverType === "custom")))
 
   if (materialType === "silver") {
     add("silverType", values.silverType)
@@ -317,6 +324,32 @@ function SelectField({ control, name, label, description, options, placeholder =
   )
 }
 
+// Replaces the price with "Price on request" in the shop. Any price entered
+// stays saved, so turning this off brings it back.
+function PriceOnRequestField({ control }) {
+  return (
+    <FormField
+      control={control}
+      name="priceOnRequest"
+      render={({ field }) => (
+        <FormItem>
+          <div className="flex items-start gap-3 rounded-md border p-4">
+            <FormControl>
+              <Switch checked={field.value} onCheckedChange={field.onChange} className="mt-1" />
+            </FormControl>
+            <div className="grid gap-1">
+              <Label className="font-medium">Price on request</Label>
+              <p className="text-muted-foreground text-xs">
+                Customers see "Price on request" instead of a price and can still order. The price field becomes optional, and any price entered stays hidden.
+              </p>
+            </div>
+          </div>
+        </FormItem>
+      )}
+    />
+  )
+}
+
 function Section({ title, children }) {
   return (
     <fieldset className="space-y-6 border-t pt-6">
@@ -349,6 +382,8 @@ export default function ProductInputForm() {
   const materialType = form.watch("materialType")
   const silverType = form.watch("silverType")
   const goldFinish = form.watch("goldFinish")
+  const priceOnRequest = form.watch("priceOnRequest")
+  const priceLabel = (name) => (priceOnRequest ? `${name} (optional, hidden)` : name)
 
   useEffect(() => {
     ApiService.getAllCategories()
@@ -359,7 +394,7 @@ export default function ProductInputForm() {
 
   useEffect(() => {
     if (!isEdit) return
-    ApiService.getProductById(productId)
+    ApiService.getAdminProduct(productId)
       .then((data) => {
         setProduct(data.product)
         setImages(existingImageItems(data.product.images))
@@ -494,7 +529,7 @@ export default function ProductInputForm() {
               {materialType && (
                 <>
                   <Section title="Basic details">
-                    <TextField control={control} name="title" label="Product name" placeholder="e.g. Shakyamuni Buddha" />
+                    <TextField control={control} name="title" label="Product name" />
                     <FormField
                       control={control}
                       name="description"
@@ -537,31 +572,43 @@ export default function ProductInputForm() {
                   {materialType === "silver" && (
                     <Section title="Silver details">
                       <p className="text-sm text-gray-600 -mt-2">
-                        Price = today's silver rate per tola × weight + making cost.
+                        Price = (today's silver rate per tola + making cost per tola) × weight in tola.
                       </p>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <SelectField control={control} name="silverType" label="Listing type" options={SILVER_TYPES} />
-                        <TextField control={control} name="makingCost" label="Making cost (Rs)" type="number" step="any" />
+                        <TextField
+                          control={control}
+                          name="makingCost"
+                          label={silverType === "custom" ? "Making cost per tola (Rs)" : priceLabel("Making cost per tola (Rs)")}
+                          type="number"
+                          step="any"
+                          description="Charged on every tola, not once per piece."
+                        />
                       </div>
-                      <FormField
-                        control={control}
-                        name="showTotalPrice"
-                        render={({ field }) => (
-                          <FormItem>
-                            <div className="flex items-start gap-3 rounded-md border p-4">
-                              <FormControl>
-                                <Switch checked={field.value} onCheckedChange={field.onChange} className="mt-1" />
-                              </FormControl>
-                              <div className="grid gap-1">
-                                <Label className="font-medium">Show total price</Label>
-                                <p className="text-muted-foreground text-xs">
-                                  The shop always shows today's rate and the making charge. Turn on to also show their added total.
-                                </p>
+                      {silverType === "stock" && <PriceOnRequestField control={control} />}
+
+                      {/* Custom pieces always show their total once a weight is entered */}
+                      {silverType !== "custom" && !priceOnRequest && (
+                        <FormField
+                          control={control}
+                          name="showTotalPrice"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="flex items-start gap-3 rounded-md border p-4">
+                                <FormControl>
+                                  <Switch checked={field.value} onCheckedChange={field.onChange} className="mt-1" />
+                                </FormControl>
+                                <div className="grid gap-1">
+                                  <Label className="font-medium">Show total price</Label>
+                                  <p className="text-muted-foreground text-xs">
+                                    The shop always shows the price as (today's rate + making charge) × weight. Turn on to also show the total.
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                       {silverType === "stock" && (
                         <div className="grid sm:grid-cols-2 gap-4">
@@ -617,6 +664,7 @@ export default function ProductInputForm() {
 
                   {materialType === "gold" && (
                     <Section title="Gold details">
+                      <PriceOnRequestField control={control} />
                       <div className="grid sm:grid-cols-2 gap-4">
                         <SelectField control={control} name="goldFinish" label="Gold finish" options={GOLD_FINISHES} />
                         {goldFinish === "full_gold" && (
@@ -624,7 +672,7 @@ export default function ProductInputForm() {
                         )}
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
-                        <TextField control={control} name="constantPrice" label="Price (Rs)" type="number" step="any" />
+                        <TextField control={control} name="constantPrice" label={priceLabel("Price (Rs)")} type="number" step="any" />
                         <SelectField control={control} name="baseMetal" label="Base metal (optional)" options={BASE_METALS} />
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
@@ -636,8 +684,9 @@ export default function ProductInputForm() {
 
                   {(materialType === "copper" || materialType === "bronze") && (
                     <Section title={`${materialType === "copper" ? "Copper" : "Bronze"} details`}>
+                      <PriceOnRequestField control={control} />
                       <div className="grid sm:grid-cols-2 gap-4">
-                        <TextField control={control} name="constantPrice" label="Price (Rs)" type="number" step="any" />
+                        <TextField control={control} name="constantPrice" label={priceLabel("Price (Rs)")} type="number" step="any" />
                         <TextField control={control} name="weightInKg" label="Weight (kg, optional)" type="number" step="any" />
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">

@@ -51,7 +51,7 @@ const COLLECTIONS = [
   {
     eyebrow: "Stock & made to order",
     title: "Silver",
-    text: "Statues and ornaments ready in stock, or made to your chosen weight, size and design. Priced on the day's silver rate plus making charge.",
+    text: "Statues and ornaments ready in stock, or made to your chosen weight, size and design. Priced per tola on the day's silver rate plus a making charge.",
     link: "/products?categoryName=Silver",
   },
   {

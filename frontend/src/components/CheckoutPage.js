@@ -18,7 +18,7 @@ import {
   StickyNote,
 } from "lucide-react";
 import ApiService from "../services/apiService";
-import { fallbackToPlaceholder, isSilver, productImage } from "../lib/productDisplay";
+import { PRICE_ON_REQUEST, fallbackToPlaceholder, isSilver, productImage } from "../lib/productDisplay";
 import { specSummary } from "./CartPage";
 import CheckoutSteps from "./shop/CheckoutSteps";
 import { CurrencyDisclaimer, NprEquivalent } from "./shop/CurrencyNote";
@@ -216,6 +216,8 @@ const CheckoutPage = () => {
   }
 
   const hasSilver = items.some((i) => isSilver(i.product));
+  const onRequestCount = items.filter((i) => i.priceSnapshot == null).length;
+  const allOnRequest = items.length > 0 && onRequestCount === items.length;
   const inputClass = (field, extra = "") =>
     `input-field w-full ${extra} ${validationErrors[field] ? "wc-invalid" : ""}`;
   const describedBy = (field) => (validationErrors[field] ? `checkout-${field}-error` : undefined);
@@ -408,7 +410,7 @@ const CheckoutPage = () => {
                         Qty {item.quantity}
                       </span>
                       <span className="text-sm font-bold" style={{ color: "var(--wc-maroon)" }}>
-                        {formatMoney(item.priceSnapshot * item.quantity)}
+                        {item.priceSnapshot == null ? PRICE_ON_REQUEST : formatMoney(item.priceSnapshot * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -420,12 +422,19 @@ const CheckoutPage = () => {
               <span className="text-sm font-semibold" style={{ color: "var(--wc-ink)" }}>
                 Estimated total
               </span>
-              <span className="wc-price-big">{formatMoney(cart.subtotal)}</span>
+              <span className="wc-price-big">{allOnRequest ? PRICE_ON_REQUEST : formatMoney(cart.subtotal)}</span>
             </div>
-            <div className="text-right">
-              <NprEquivalent npr={cart.subtotal} className="text-xs" />
-            </div>
-            <CurrencyDisclaimer className="mt-2" />
+            {!allOnRequest && (
+              <div className="text-right">
+                <NprEquivalent npr={cart.subtotal} className="text-xs" />
+              </div>
+            )}
+            {onRequestCount > 0 && !allOnRequest && (
+              <p className="text-xs mt-2 text-right" style={{ color: "var(--wc-ink-muted)" }}>
+                Plus {onRequestCount} {onRequestCount === 1 ? "item" : "items"} on request.
+              </p>
+            )}
+            {!allOnRequest && <CurrencyDisclaimer className="mt-2" />}
             <p className="text-xs mt-3" style={{ color: "var(--wc-ink-muted)" }}>
               {hasSilver ? "Silver prices use today's rate. " : ""}The final price is confirmed when we contact you.
             </p>

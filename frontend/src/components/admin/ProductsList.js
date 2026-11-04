@@ -48,7 +48,7 @@ export default function ProductsList() {
   const [saving, setSaving] = useState(null)
 
   // Change one yes/no field of a product straight from the list:
-  // showTotalPrice (silver: show the added total, not just rate + making)
+  // showTotalPrice (silver: show the total, not just the price formula)
   // or isFeatured (shown on the home page)
   async function quickUpdate(product, field, value) {
     setSaving(product._id)
@@ -180,7 +180,7 @@ export default function ProductsList() {
                 <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{describeProduct(p)}</td>
                 <td className="px-4 py-3 text-gray-900 whitespace-nowrap">
                   {describePrice(p)}
-                  {p.productType === "silver" && (
+                  {p.productType === "silver" && p.silverType !== "custom" && (
                     <label className="mt-1 flex items-center gap-2 text-xs text-gray-600">
                       <Switch
                         checked={p.showTotalPrice === true}

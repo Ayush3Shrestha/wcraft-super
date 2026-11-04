@@ -51,6 +51,7 @@ export function describeProduct(product) {
 
 // Price shown in tables: fixed price, live silver price, or a custom range
 export function describePrice(product) {
+  if (product?.priceOnRequest) return "Price on request"
   const pricing = product?.pricing
   if (!pricing) return formatRs(product?.constantPrice)
   if (pricing.price != null) return formatRs(pricing.price)

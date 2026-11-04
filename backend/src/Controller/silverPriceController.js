@@ -1,13 +1,6 @@
 const SilverPrice = require("../Model/silverPriceModel");
 const { scrapeSilverPrice } = require("../Services/silverPriceScraper");
-
-// Helper to get Nepal date (midnight)
-function getNepalDate() {
-  const now = new Date();
-  const nepalTime = new Date(now.getTime() + (5 * 60 + 45) * 60 * 1000);
-  nepalTime.setHours(0, 0, 0, 0);
-  return nepalTime;
-}
+const { getNepalDate, formatNepalDate } = require("../Services/nepalDate");
 
 // Fetch and save price if new
 exports.fetchAndSavePrice = async () => {
@@ -24,17 +17,22 @@ exports.fetchAndSavePrice = async () => {
       dailyChange: dailyChange
     });
     console.log(
-      `✅ New price saved: ${price} on ${effectiveDate.toDateString()} DailyChange: ${dailyChange}`
+      `✅ New price saved: ${price} on ${formatNepalDate(effectiveDate)} DailyChange: ${dailyChange}`
     );
     return { price, saved: true, dailyChange  };
   }
 
-  if (existing.pricePerTola !== price && scrapedAt > existing.lastScrapedAt) {
+  // The source can revise the change without the price moving, so compare both
+  const priceChanged = existing.pricePerTola !== price;
+  const changeChanged = dailyChange != null && existing.dailyChange !== String(dailyChange);
+
+  if ((priceChanged || changeChanged) && scrapedAt > existing.lastScrapedAt) {
     existing.pricePerTola = price;
     existing.lastScrapedAt = scrapedAt;
+    if (dailyChange != null) existing.dailyChange = dailyChange;
     await existing.save();
     console.log(
-      `🔄 Price updated: ${price} on ${effectiveDate.toDateString()}`
+      `🔄 Price updated: ${price} on ${formatNepalDate(effectiveDate)} DailyChange: ${dailyChange}`
     );
     return { price, saved: true, dailyChange  };
   }

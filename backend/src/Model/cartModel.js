@@ -15,8 +15,7 @@ const cartItemSchema = new mongoose.Schema({
     default: 1
   },
   priceSnapshot: {
-    type: Number,
-    required: true // Price at the time of adding to cart
+    type: Number // Price at the time of adding to cart; empty for "Price on request"
   },
   silverPriceSnapshot: {
     type: Number // Silver price per tola when added (for silver products)
@@ -93,14 +92,15 @@ cartSchema.pre('save', function(next) {
 // Virtual for calculated total (in case prices changed)
 cartSchema.virtual('calculatedTotal').get(function() {
   return this.items.reduce((total, item) => {
-    return total + (item.priceSnapshot * item.quantity);
+    return total + ((item.priceSnapshot || 0) * item.quantity);
   }, 0);
 });
 
 // Method to recalculate totals
 cartSchema.methods.recalculateTotals = function() {
   this.totalItems = this.items.reduce((total, item) => total + item.quantity, 0);
-  this.subtotal = this.items.reduce((total, item) => total + (item.priceSnapshot * item.quantity), 0);
+  // Items on request have no price yet, so they add nothing here
+  this.subtotal = this.items.reduce((total, item) => total + ((item.priceSnapshot || 0) * item.quantity), 0);
   return this;
 };
 

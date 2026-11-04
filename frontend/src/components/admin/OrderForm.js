@@ -134,7 +134,7 @@ export default function OrderForm() {
       const rate = isEdit ? order?.silverPriceSnapshot : product.pricing?.silverRate
       const weight = Number(values.preferredWeight)
       if (!rate || !weight) return null
-      return (rate * weight + (product.makingCost || 0)) * qty
+      return (rate + (product.makingCost || 0)) * weight * qty
     }
     const unit = isEdit ? (order?.totalPrice != null ? order.totalPrice / order.quantity : null) : product.pricing?.price
     return unit != null ? unit * qty : null
@@ -424,7 +424,7 @@ export default function OrderForm() {
           <fieldset className="space-y-4 border-t pt-6">
             <legend className="text-lg font-semibold text-gray-900 pr-2">Price and notes</legend>
             <div className="rounded-md bg-gray-50 p-4 text-sm text-gray-700">
-              Estimated total: <strong>{estimate != null ? formatRs(estimate) : "—"}</strong>
+              Estimated total: <strong>{estimate != null ? formatRs(estimate) : product?.priceOnRequest ? "Price on request, enter the agreed total below" : "—"}</strong>
               {custom && (
                 <span className="block text-xs text-gray-500 mt-1">
                   {isEdit ? "Uses the silver rate locked when the order was placed." : "Uses today's silver rate; it's locked in when the order is saved."}

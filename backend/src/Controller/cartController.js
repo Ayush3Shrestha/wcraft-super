@@ -26,11 +26,18 @@ async function refreshCartPrices(cart) {
       dirty = true;
       continue;
     }
-    const { price, silverRate: rate } = await calculatePrice(product, {
+    const { price, silverRate: rate, pricingType } = await calculatePrice(product, {
       silverRate: silverRate ?? undefined,
       customSpecification: item.customSpecification,
     });
-    if (price != null && Math.abs(price - item.priceSnapshot) > 0.01) {
+    if (pricingType === "on_request") {
+      if (item.priceSnapshot != null) {
+        priceChanges.push({ itemId: item._id, previousPrice: item.priceSnapshot, price: null });
+        item.priceSnapshot = undefined;
+        item.silverPriceSnapshot = undefined;
+        dirty = true;
+      }
+    } else if (price != null && (item.priceSnapshot == null || Math.abs(price - item.priceSnapshot) > 0.01)) {
       priceChanges.push({ itemId: item._id, previousPrice: item.priceSnapshot, price });
       item.priceSnapshot = price;
       item.silverPriceSnapshot = rate ?? item.silverPriceSnapshot;
@@ -103,10 +110,10 @@ addToCart = async (req, res) => {
         .json({ message: "Invalid custom specification", errors });
     }
 
-    const { price, silverRate } = await calculatePrice(product, {
+    const { price, silverRate, pricingType } = await calculatePrice(product, {
       customSpecification: specification,
     });
-    if (price == null) {
+    if (price == null && pricingType !== "on_request") {
       return res.status(400).json({
         message: "Price for this product is not available right now",
       });
@@ -429,7 +436,7 @@ generateCheckoutUrl = async (req, res) => {
         product: item.product._id,
         quantity: item.quantity,
         silverPriceSnapshot: item.silverPriceSnapshot,
-        totalPrice: item.priceSnapshot * item.quantity,
+        totalPrice: item.priceSnapshot != null ? item.priceSnapshot * item.quantity : null,
         notes: cart.orderNotes,
         customization: item.customization,
         customSpecification: item.customSpecification,
@@ -450,8 +457,12 @@ generateCheckoutUrl = async (req, res) => {
       message += `\n${index + 1}. *${item.product.title}*\n`;
       message += `   Category: ${item.product.category?.name || "-"}\n`;
       message += `   Quantity: ${item.quantity}\n`;
-      message += `   Price: Rs. ${Math.round(item.priceSnapshot).toLocaleString()} each\n`;
-      message += `   Subtotal: Rs. ${Math.round(item.priceSnapshot * item.quantity).toLocaleString()}\n`;
+      if (item.priceSnapshot != null) {
+        message += `   Price: Rs. ${Math.round(item.priceSnapshot).toLocaleString()} each\n`;
+        message += `   Subtotal: Rs. ${Math.round(item.priceSnapshot * item.quantity).toLocaleString()}\n`;
+      } else {
+        message += `   Price: On request\n`;
+      }
       const spec = item.customSpecification;
       if (spec && spec.preferredWeight != null) {
         message += `   *Custom Specification:*\n`;
@@ -470,7 +481,12 @@ generateCheckoutUrl = async (req, res) => {
       }
     });
 
-    message += `\n💰 *Estimated Total: Rs. ${Math.round(cart.subtotal).toLocaleString()}*\n`;
+    const onRequest = cart.items.filter((item) => item.priceSnapshot == null).length;
+    if (onRequest < cart.items.length) {
+      message += `\n💰 *Estimated Total: Rs. ${Math.round(cart.subtotal).toLocaleString()}*${onRequest ? ` + ${onRequest} item(s) on request` : ""}\n`;
+    } else {
+      message += `\n💰 *Price on request*\n`;
+    }
 
     if (cart.orderNotes) {
       message += `\n📝 *Order Notes:*\n${cart.orderNotes}\n`;

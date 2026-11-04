@@ -123,7 +123,7 @@
   flex-direction: column;
   overflow: hidden;
   border-radius: 8px;
-  background-color: var(--wc-crimson);
+  background-color: var(--wc-maroon);
   color: var(--wc-on-dark);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -172,7 +172,7 @@
   color: var(--wc-on-dark);
   overflow-wrap: anywhere;
 }
-/* "per tola × weight + making" under a silver rate */
+/* "per tola ..." under a silver price */
 .wc-product-card .wc-price-suffix {
   display: block;
   margin-top: 0.15rem;
@@ -181,6 +181,16 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   opacity: 0.8;
+}
+/* "Rs. 3,675 + Rs. 450" needs the card's full width: the link goes under it */
+.wc-product-card .wc-per-tola {
+  flex-wrap: wrap;
+}
+.wc-product-card .wc-per-tola .wc-product-price {
+  flex-basis: 100%;
+}
+.wc-product-card .wc-per-tola > :last-child {
+  margin-left: auto;
 }
 /* Long names stop at two lines instead of stretching the card */
 .wc-product-card .wc-product-title {
@@ -222,7 +232,7 @@
    ========================================================= */
 
 .wc-product-card.wc-crimson {
-  background-color: var(--wc-crimson);
+  background-color: var(--wc-maroon);
   color: var(--wc-on-dark);
 }
 

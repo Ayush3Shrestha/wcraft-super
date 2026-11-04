@@ -20,7 +20,7 @@ const TOPICS = [
 const FAQS = [
   {
     q: "How are silver prices worked out?",
-    a: "Silver pieces are priced on the day's silver rate per tola, multiplied by the weight, plus a making charge. The rate is shown on every silver product, and the final price is confirmed with you before you pay.",
+    a: "Silver pieces are priced per tola: the day's silver rate plus a making charge, multiplied by the weight in tola. The rate is shown on every silver product, and the final price is confirmed with you before you pay.",
   },
   {
     q: "Can I order a custom piece?",
