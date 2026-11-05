@@ -65,7 +65,10 @@ export function variantLabel(p) {
   return "";
 }
 
-// Silver is priced as today's rate + making charge; the total is only shown
+export const isPriceOnRequest = (p) => p?.priceOnRequest === true;
+export const PRICE_ON_REQUEST = "Price on request";
+
+// Silver is priced as (today's rate + making charge) × weight; the total is only shown
 // when the admin turns on "Show total price" for the product
 export const showsTotal = (p) => !isSilver(p) || p?.showTotalPrice === true;
 
@@ -101,8 +104,12 @@ export function productHeight(p) {
 // `format` turns an NPR amount into text (the visitor's currency by default).
 export function priceLabel(p, format = formatMoney) {
   const pricing = p?.pricing;
-  if (isSilver(p) && !showsTotal(p)) {
-    return pricing?.silverRate != null ? `${format(pricing.silverRate)}/tola + making` : "Price on request";
+  if (isPriceOnRequest(p)) return PRICE_ON_REQUEST;
+  // Custom pieces have no weight until the customer chooses one on the product page
+  if (isCustomSilver(p) || (isSilver(p) && !showsTotal(p))) {
+    if (pricing?.silverRate == null) return "Price on request";
+    // Non-breaking spaces, so "Rs. 450" can't split across two lines
+    return `${format(pricing.silverRate)} + ${format(p.makingCost || 0)}`.replace(/\. /g, ".\u00a0");
   }
   if (pricing?.price != null) return format(pricing.price);
   if (pricing?.priceRange) return `From ${format(pricing.priceRange.min)}`;

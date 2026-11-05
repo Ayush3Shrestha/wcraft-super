@@ -22,6 +22,12 @@ import CategoriesList from './components/admin/CategoriesList';
 import OrdersList from './components/admin/OrdersList';
 import OrderForm from './components/admin/OrderForm';
 import BlogsList from './components/admin/BlogsList';
+import PriceHistory from './components/admin/PriceHistory';
+import AnnouncementsList from './components/admin/AnnouncementsList';
+import CustomersList from './components/admin/CustomersList';
+import CustomerDetail from './components/admin/CustomerDetail';
+import TestimonialsList from './components/admin/TestimonialsList';
+import TestimonialForm from './components/admin/TestimonialForm';
 import BlogForm from './components/admin/BlogForm';
 import BlogPage from './components/BlogPage';
 import BlogPostPage from './components/BlogPostPage';
@@ -86,6 +92,13 @@ function AdminRoutes() {
         <Route path="orders" element={<OrdersList />} />
         <Route path="orders/new" element={<OrderForm />} />
         <Route path="orders/:orderId/edit" element={<OrderForm key="edit" />} />
+        <Route path="prices" element={<PriceHistory />} />
+        <Route path="announcements" element={<AnnouncementsList />} />
+        <Route path="customers" element={<CustomersList />} />
+        <Route path="customers/:customerId" element={<CustomerDetail />} />
+        <Route path="testimonials" element={<TestimonialsList />} />
+        <Route path="testimonials/new" element={<TestimonialForm />} />
+        <Route path="testimonials/:id/edit" element={<TestimonialForm key="edit" />} />
         <Route path="blogs" element={<BlogsList />} />
         <Route path="blogs/new" element={<BlogForm />} />
         <Route path="blogs/:postId/edit" element={<BlogForm key="edit" />} />

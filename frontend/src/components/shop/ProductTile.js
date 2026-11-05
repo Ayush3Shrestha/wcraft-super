@@ -5,6 +5,7 @@ import { useCurrency } from "../../lib/currency";
 import {
   fallbackToPlaceholder,
   isCustomSilver,
+  isPriceOnRequest,
   isSilver,
   priceLabel,
   productImage,
@@ -24,8 +25,10 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
   const custom = isCustomSilver(product);
   const row = layout === "row";
   const detailed = row || light;
-  // Silver without a shown total: the rate, with "+ making" on its own line
-  const rate = isSilver(product) && !showsTotal(product) ? product.pricing?.silverRate : null;
+  // Silver is shown per tola (rate + making), unless the admin shows the total.
+  // Custom pieces always are: their weight is chosen on the product page.
+  const onRequest = isPriceOnRequest(product);
+  const perTola = !onRequest && (custom || (isSilver(product) && !showsTotal(product))) && product.pricing?.silverRate != null;
 
   return (
     <article className={`wc-product-card group ${crimson && !light ? "wc-crimson" : ""} ${light ? "wc-light" : ""} ${row ? "wc-row" : ""}`}>
@@ -33,7 +36,7 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
         <Link to={url} tabIndex={-1} aria-hidden="true">
           <img src={productImage(product)} onError={fallbackToPlaceholder} alt={product.title} loading="lazy" decoding="async" />
         </Link>
-        {isSilver(product) && <span className="wc-tag">Live price</span>}
+        {isSilver(product) && !onRequest && <span className="wc-tag">Live price</span>}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           <Link to={url} className="wc-icon-btn" aria-label={`View ${product.title}`}>
             <Eye size={16} />
@@ -56,15 +59,13 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
           </Link>
         </h3>
         {detailed && product.description && <p className="wc-product-desc text-sm mb-4 line-clamp-2">{product.description}</p>}
-        <div className="mt-auto flex items-center justify-between gap-2">
+        <div className={`mt-auto flex items-center justify-between gap-2 ${perTola ? "wc-per-tola" : ""}`}>
           <span className="wc-product-price">
-            {rate != null ? (
-              <>
-                {format(rate)}
-                <span className="wc-price-suffix">per tola × weight + making</span>
-              </>
-            ) : (
-              priceLabel(product, format)
+            {priceLabel(product, format)}
+            {perTola && (
+              <span className="wc-price-suffix">
+                {custom ? "per tola (silver rate + making)" : `per tola × ${product.weightInTola} tola`}
+              </span>
             )}
           </span>
           {detailed ? (

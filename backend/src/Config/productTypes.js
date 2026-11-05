@@ -58,12 +58,13 @@ function getProductSchemaSpec(materialType) {
       return {
         materialType,
         productType: "silver",
-        pricing: "live silver rate per tola × weight + making cost",
+        pricing: "(live silver rate per tola + making cost per tola) × weight in tola",
         fields: {
           ...common,
           silverType: { type: "enum", options: toOptions(SILVER_LISTING_TYPES), required: true },
-          makingCost: { type: "number", required: true },
+          makingCost: { type: "number", requiredWhen: { priceOnRequest: false }, unit: "per tola" },
           showTotalPrice: { type: "boolean", default: false },
+          priceOnRequest: { type: "boolean", default: false, note: "stock listings only" },
         },
         variants: {
           stock: {
@@ -108,7 +109,8 @@ function getProductSchemaSpec(materialType) {
         pricing: "fixed price",
         fields: {
           ...common,
-          constantPrice: { type: "number", required: true },
+          constantPrice: { type: "number", requiredWhen: { priceOnRequest: false } },
+          priceOnRequest: { type: "boolean", default: false },
           goldFinish: { type: "enum", options: toOptions(GOLD_FINISHES), required: true },
           platingMethod: {
             type: "enum",
@@ -129,7 +131,8 @@ function getProductSchemaSpec(materialType) {
         pricing: "fixed price",
         fields: {
           ...common,
-          constantPrice: { type: "number", required: true },
+          constantPrice: { type: "number", requiredWhen: { priceOnRequest: false } },
+          priceOnRequest: { type: "boolean", default: false },
           weightInKg: { type: "number" },
           finish: { type: "string" },
           stockQuantity: { type: "number", default: 0 },

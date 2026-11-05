@@ -4,6 +4,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import ApiService from "../services/apiService";
 import { SHOP } from "../lib/shopInfo";
 import CurrencySwitcher from "./shop/CurrencySwitcher";
+import AnnouncementTicker from "./shop/AnnouncementTicker";
 import logo from "../logo.jpg";
 import "../styles/layout.css";
 
@@ -14,9 +15,6 @@ const NAV_ITEMS = [
   { name: "About Us", path: "/about" },
   { name: "Contact", path: "/contact" },
 ];
-
-// Short messages for the announcement bar; all describe how the shop works
-const ANNOUNCEMENTS = ["Silver priced on today's rate", "Custom silver pieces made to order", "Handcrafted in Patan, Lalitpur"];
 
 function Brand({ compact = false }) {
   return (
@@ -104,11 +102,7 @@ export default function Navbar() {
       {/* Announcement bar */}
       <div className="wc-topbar">
         <div className="container mx-auto px-4 sm:px-6 h-8 flex items-center justify-between gap-4">
-          <p className="truncate">
-            <span aria-hidden="true">✦ </span>
-            <span className="hidden lg:inline">{ANNOUNCEMENTS.join("  ·  ")}</span>
-            <span className="lg:hidden">{ANNOUNCEMENTS[0]}</span>
-          </p>
+          <AnnouncementTicker />
           {SHOP.phone && (
             <a href={SHOP.phoneHref} className="hidden sm:inline whitespace-nowrap">
               Call {SHOP.phone}

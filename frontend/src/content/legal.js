@@ -7,7 +7,7 @@ import { SHOP } from "../lib/shopInfo";
 // every page that mentions them follows. Have the final wording checked by
 // someone who knows Nepali consumer and privacy law before relying on it.
 
-export const LAST_UPDATED = "27 October 2026";
+export const LAST_UPDATED = "4 November 2026";
 
 export const POLICY = {
   returnDays: 7, // days after delivery to ask for a return of a ready-made piece
@@ -147,7 +147,7 @@ export const TERMS = {
       body: [
         {
           list: [
-            "Silver pieces are priced from today's silver rate per tola multiplied by the weight, plus a making charge. The silver rate changes daily, so the price can change until your order is confirmed.",
+            "Silver pieces are priced per tola: today's silver rate plus a making charge, multiplied by the weight in tola. The silver rate changes daily, so the price can change until your order is confirmed.",
             "Other pieces have a listed price. Prices are negotiable and the final price is agreed with you before you pay.",
             "Prices are in Nepali rupees (NPR). Amounts shown in other currencies are approximate conversions for your information only; you pay the agreed amount in NPR unless we agree otherwise.",
             "Prices do not include delivery charges, international shipping, customs duties or import taxes, which we tell you about before you pay.",

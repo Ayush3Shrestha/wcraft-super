@@ -18,10 +18,17 @@ const cart = require("./src/Routes/cartRoute");
 const currency = require("./src/Routes/currencyRoute");
 const blog = require("./src/Routes/blogRoute");
 const sitemap = require("./src/Routes/sitemapRoute");
+const customer = require("./src/Routes/customerRoute");
+const testimonial = require("./src/Routes/testimonialRoute");
+const announcement = require("./src/Routes/announcementRoute");
+const { ensureDefaultAnnouncements } = require("./src/Controller/announcementController");
 
 // Connect to database, then refresh silver/gold prices so a restart never
 // leaves stale rates waiting for the next scheduled run
-connectDB().then(() => runStartupPriceUpdate());
+connectDB().then(() => {
+  ensureDefaultAnnouncements().catch((err) => console.error("Default announcements failed:", err.message));
+  return runStartupPriceUpdate();
+});
 
 // Middleware
 app.disable("x-powered-by");
@@ -46,6 +53,9 @@ app.use("/api", admin);
 app.use("/api", cart);
 app.use("/api", currency);
 app.use("/api", blog);
+app.use("/api", customer);
+app.use("/api", testimonial);
+app.use("/api", announcement);
 
 // Sitemap for search engines, at /sitemap.xml and /api/sitemap.xml
 app.use(sitemap);

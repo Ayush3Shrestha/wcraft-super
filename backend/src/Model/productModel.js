@@ -21,6 +21,21 @@ const dimensionsSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// A price hidden with "Price on request" stays stored, so turning the option
+// off restores it, but it never leaves the server in a normal response
+// (the admin form reads it through GET /admin/products/:id).
+function hideRequestedPrice(doc, ret) {
+  if (ret.priceOnRequest) {
+    delete ret.constantPrice;
+    delete ret.makingCost;
+  }
+  return ret;
+}
+
+const priceRequired = function () {
+  return !this.priceOnRequest;
+};
+
 const productSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -38,12 +53,14 @@ const productSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     // Featured products are the ones shown on the home page
     isFeatured: { type: Boolean, default: false, index: true },
+    // Show "Price on request" instead of a price (not for custom silver)
+    priceOnRequest: { type: Boolean, default: false },
   },
   {
     timestamps: true,
     discriminatorKey: "productType",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
+    toJSON: { virtuals: true, transform: hideRequestedPrice },
+    toObject: { virtuals: true, transform: hideRequestedPrice },
   }
 );
 
@@ -81,8 +98,9 @@ const customOptionsSchema = new mongoose.Schema(
 
 const silverProductSchema = new mongoose.Schema({
   silverType: { type: String, enum: SILVER_LISTING_TYPES, required: true },
-  makingCost: { type: Number, min: 0, required: true },
-  // The shop shows today's rate + making charge; this also shows their total
+  // Charged per tola: price = (silver rate + makingCost) × weight in tola
+  makingCost: { type: Number, min: 0, required: priceRequired },
+  // The shop shows the price as that formula; this also shows the total
   showTotalPrice: { type: Boolean, default: false },
 
   // stock
@@ -124,6 +142,9 @@ silverProductSchema.pre("validate", function (next) {
       this.invalidate("customOptions.sizeRange", "sizeRange.minHeight cannot be greater than maxHeight");
     }
 
+    // Custom pieces are priced from the weight the customer chooses
+    this.priceOnRequest = false;
+
     // Custom pieces are made to order, so there is no fixed weight or stock
     this.weightInTola = undefined;
     this.stockQuantity = undefined;
@@ -136,7 +157,7 @@ silverProductSchema.pre("validate", function (next) {
 // ---------------------------------------------------------------------------
 
 const goldProductSchema = new mongoose.Schema({
-  constantPrice: { type: Number, min: 0, required: true },
+  constantPrice: { type: Number, min: 0, required: priceRequired },
   goldFinish: { type: String, enum: GOLD_FINISHES, required: true },
   platingMethod: { type: String, enum: GOLD_PLATING_METHODS },
   baseMetal: { type: String, enum: BASE_METALS },
@@ -163,7 +184,7 @@ goldProductSchema.pre("validate", function (next) {
 const metalProductSchema = new mongoose.Schema({
   // Copied from the category's materialType on create
   metal: { type: String, enum: ["copper", "bronze"], required: true },
-  constantPrice: { type: Number, min: 0, required: true },
+  constantPrice: { type: Number, min: 0, required: priceRequired },
   weightInKg: { type: Number, min: 0 },
   finish: { type: String, trim: true },
   stockQuantity: { type: Number, min: 0, default: 0 },

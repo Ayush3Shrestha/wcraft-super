@@ -104,18 +104,25 @@ function validateCustomSpecification(product, input = {}) {
 
 /**
  * Work out a product's price.
- *  - silver stock:  rate × weightInTola + makingCost
- *  - silver custom: rate × preferredWeight + makingCost (estimate), or a
+ *  - silver stock:  (rate + makingCost) × weightInTola
+ *  - silver custom: (rate + makingCost) × preferredWeight (estimate), or a
  *                   min/max range across weightRange when no weight is given
+ * makingCost is charged per tola, like the silver rate.
  *  - gold / copper / bronze: constantPrice
+ *  - priceOnRequest: no price (pricingType "on_request")
  *
  * Returns { price, priceRange, silverRate, pricingType }.
  * `price` is null when it cannot be determined (e.g. no silver rate yet).
  */
 async function calculatePrice(product, { silverRate, customSpecification } = {}) {
+  if (product.priceOnRequest) {
+    return { price: null, priceRange: null, silverRate: null, pricingType: "on_request" };
+  }
+
   if (isSilver(product)) {
     const rate = silverRate ?? (await getLatestSilverRate());
-    const making = product.makingCost || 0;
+    // Price per tola: silver plus the work that goes into it
+    const perTola = rate == null ? null : rate + (product.makingCost || 0);
 
     if (rate == null) {
       return { price: null, priceRange: null, silverRate: null, pricingType: "silver_rate" };
@@ -125,11 +132,11 @@ async function calculatePrice(product, { silverRate, customSpecification } = {})
       const { min, max } = product.weightRange || {};
       const priceRange =
         min != null && max != null
-          ? { min: round(rate * min + making), max: round(rate * max + making) }
+          ? { min: round(perTola * min), max: round(perTola * max) }
           : null;
       const weight = customSpecification?.preferredWeight;
       return {
-        price: weight != null ? round(rate * weight + making) : null,
+        price: weight != null ? round(perTola * weight) : null,
         priceRange,
         silverRate: rate,
         pricingType: "silver_rate_estimate",
@@ -137,7 +144,7 @@ async function calculatePrice(product, { silverRate, customSpecification } = {})
     }
 
     return {
-      price: product.weightInTola != null ? round(rate * product.weightInTola + making) : null,
+      price: product.weightInTola != null ? round(perTola * product.weightInTola) : null,
       priceRange: null,
       silverRate: rate,
       pricingType: "silver_rate",

@@ -39,6 +39,7 @@ import {
   formatLength,
   isCustomSilver,
   isInStock,
+  isPriceOnRequest,
   isSilver,
   label,
   priceLabel,
@@ -98,19 +99,22 @@ function specList(p) {
 }
 
 // Structured data for search engines. Silver pieces only list a price when
-// the admin shows the total; otherwise the page shows rate + making charge.
+// the admin shows the total; otherwise the page shows the price formula.
 function productJsonLd(p) {
   const url = absoluteUrl(`/product/${p._id}`);
   const pricing = p.pricing || {};
   const availability = isInStock(p) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock";
   let offers;
-  if (showsTotal(p)) {
-    const seller = { "@id": `${SITE_URL}/#store` };
-    if (pricing.price != null || p.constantPrice != null) {
-      offers = { "@type": "Offer", url, priceCurrency: "NPR", price: pricing.price ?? p.constantPrice, availability, seller };
-    } else if (pricing.priceRange) {
-      offers = { "@type": "AggregateOffer", url, priceCurrency: "NPR", lowPrice: pricing.priceRange.min, highPrice: pricing.priceRange.max, availability, seller };
-    }
+  // Custom pieces have no price until the customer enters a weight
+  if (showsTotal(p) && !isCustomSilver(p) && !isPriceOnRequest(p) && (pricing.price != null || p.constantPrice != null)) {
+    offers = {
+      "@type": "Offer",
+      url,
+      priceCurrency: "NPR",
+      price: pricing.price ?? p.constantPrice,
+      availability,
+      seller: { "@id": `${SITE_URL}/#store` },
+    };
   }
   const material = isSilver(p) ? "Silver" : p.productType === "metal" ? capitalize(p.metal) : capitalize(p.baseMetal) || undefined;
   return [
@@ -155,7 +159,7 @@ function MetalRate({ metal, rate, formatMoney }) {
   );
 }
 
-// Silver price written out: rate × weight + making charge (= total)
+// Silver price written out: (rate + making charge) × weight (= total)
 function SilverFormula({ rate, weight, weightNote, making, total, formatMoney }) {
   const Term = ({ value, caption }) => (
     <span className="wc-formula-term">
@@ -165,17 +169,23 @@ function SilverFormula({ rate, weight, weightNote, making, total, formatMoney })
   );
   return (
     <div className="wc-formula">
-      <div className="wc-formula-label">Today's silver rate × weight + making charge</div>
+      <div className="wc-formula-label">(Today's silver rate + making charge) × weight</div>
       <div className="wc-formula-row">
+        <span className="wc-formula-op" aria-hidden="true">
+          (
+        </span>
         <Term value={rate != null ? formatMoney(rate) : "—"} caption="silver rate / tola" />
+        <span className="wc-formula-op" aria-label="plus">
+          +
+        </span>
+        <Term value={formatMoney(making)} caption="making / tola" />
+        <span className="wc-formula-op" aria-hidden="true">
+          )
+        </span>
         <span className="wc-formula-op" aria-label="times">
           ×
         </span>
         <Term value={weight} caption={weightNote} />
-        <span className="wc-formula-op" aria-label="plus">
-          +
-        </span>
-        <Term value={formatMoney(making)} caption="making charge" />
       </div>
       {total}
     </div>
@@ -273,8 +283,14 @@ const SingleProductPage = () => {
 
   // Unit price: fixed / stock silver from the API, custom silver from the chosen weight
   const unitPrice = useMemo(() => {
-    if (!product) return null;
-    if (custom) return estimateCustomPrice(product, spec, silverRate);
+    if (!product || isPriceOnRequest(product)) return null;
+    if (custom) {
+      // No total for a weight the workshop can't make
+      const { min, max } = product.weightRange || {};
+      const weight = Number(spec.preferredWeight);
+      if (weight < min || weight > max) return null;
+      return estimateCustomPrice(product, spec, silverRate);
+    }
     return product.pricing?.price ?? product.constantPrice ?? null;
   }, [product, custom, spec, silverRate]);
 
@@ -405,13 +421,10 @@ const SingleProductPage = () => {
   const specs = specList(product);
   const height = productHeight(product);
   const inStock = isInStock(product);
-  const showTotal = showsTotal(product);
-  const totalText =
-    unitPrice != null
-      ? formatMoney(unitPrice * quantity)
-      : custom && product.pricing?.priceRange
-      ? `${formatMoney(product.pricing.priceRange.min)} – ${formatMoney(product.pricing.priceRange.max)}`
-      : null;
+  // Custom pieces always show their total, once a weight is entered
+  const onRequest = isPriceOnRequest(product);
+  const showTotal = custom || showsTotal(product);
+  const totalText = unitPrice != null ? formatMoney(unitPrice * quantity) : null;
 
   return (
     <div className="wc-page wc-pd min-h-screen">
@@ -522,12 +535,21 @@ const SingleProductPage = () => {
             <div className="wc-panel space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="wc-panel-title">Price</h2>
-                <span className="wc-price-badge">
-                  <Handshake size={12} /> Negotiable
-                </span>
+                {!onRequest && (
+                  <span className="wc-price-badge">
+                    <Handshake size={12} /> Negotiable
+                  </span>
+                )}
               </div>
 
-              {isSilver(product) ? (
+              {onRequest ? (
+                <>
+                  <span className="wc-price-big">{priceLabel(product, formatMoney)}</span>
+                  <p className="text-sm" style={{ color: "var(--wc-ink-muted)" }}>
+                    Chat with us or add it to your cart, and we'll share the price before you pay.
+                  </p>
+                </>
+              ) : isSilver(product) ? (
                 <>
                   <SilverFormula
                     rate={silverRate}
@@ -543,7 +565,7 @@ const SingleProductPage = () => {
                       showTotal &&
                       totalText && (
                         <div className="wc-formula-total">
-                          <span>{custom ? "Estimated total" : quantity > 1 ? `Total for ${quantity}` : "Total"}</span>
+                          <span>{custom ? (quantity > 1 ? `Estimated total for ${quantity}` : "Estimated total") : quantity > 1 ? `Total for ${quantity}` : "Total"}</span>
                           <strong>= {totalText}</strong>
                           {unitPrice != null && <NprEquivalent npr={unitPrice * quantity} className="basis-full text-right text-xs" />}
                         </div>
@@ -571,7 +593,7 @@ const SingleProductPage = () => {
                   </p>
                 </>
               )}
-              <CurrencyDisclaimer />
+              {!onRequest && <CurrencyDisclaimer />}
             </div>
 
             {/* Description */}

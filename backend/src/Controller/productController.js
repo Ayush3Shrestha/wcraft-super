@@ -55,6 +55,7 @@ function buildProductFields(body, productType, materialType) {
     dimensions,
     isActive: body.isActive,
     isFeatured: body.isFeatured,
+    priceOnRequest: body.priceOnRequest,
   };
 
   if (productType === "silver") {
@@ -365,6 +366,17 @@ exports.getProductById = async (req, res) => {
     }
 
     res.status(200).json({ product: await withPricing(product) });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching product", error: error.message });
+  }
+};
+
+// A product with any price hidden by "Price on request", for the admin form
+exports.getProductForAdmin = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId).populate("category").lean().catch(() => null);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.status(200).json({ product });
   } catch (error) {
     res.status(500).json({ message: "Error fetching product", error: error.message });
   }

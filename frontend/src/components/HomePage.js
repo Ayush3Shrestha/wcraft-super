@@ -7,6 +7,7 @@ import { imageUrl, isCustomSilver } from "../lib/productDisplay";
 import LivePriceCard from "./shop/LivePriceCard";
 import ProductTile from "./shop/ProductTile";
 import CardSlider from "./shop/CardSlider";
+import Testimonials from "./shop/Testimonials";
 import "../styles/home.css";
 
 const HERO_IMAGE = `${process.env.PUBLIC_URL}/images/hero-tara.webp`;
@@ -266,6 +267,8 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      <Testimonials />
 
       {toast && (
         <div className="wc-toast" role="status">

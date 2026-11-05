@@ -90,7 +90,7 @@ POST http://localhost:8081/api/admin/init
 ### Product Management
 - **Categories**: Gold Statue, Silver Crafts, Custom Silver
 - **Gold Products**: Fixed pricing with height specifications
-- **Silver Products**: Dynamic pricing based on weight × current silver price + making cost
+- **Silver Products**: Dynamic pricing based on (current silver price + making cost per tola) × weight in tola
 - **Custom Silver**: Weight ranges for customer customization
 
 ### Order Workflow
