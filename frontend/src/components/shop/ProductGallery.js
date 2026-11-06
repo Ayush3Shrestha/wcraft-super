@@ -3,6 +3,9 @@ import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Maximize2, Share2, X } from "lucide-react";
 import { fallbackToPlaceholder } from "../../lib/productDisplay";
 
+// Longest a programmatic scroll is trusted to finish, if it never gets there
+const SCROLL_SETTLE_MS = 1500;
+
 const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
@@ -17,21 +20,41 @@ export default function ProductGallery({ images, title, chip, badge, onShare, ca
   const [viewerOpen, setViewerOpen] = useState(false);
   const trackRef = useRef(null);
   const thumbsRef = useRef(null);
+  // The slide the track is moving to after goTo. Until it arrives, the scroll
+  // position is still near the old slide and must not change the current image.
+  const scrollTarget = useRef(null);
+  const settleTimer = useRef(null);
+
+  const stopFollowingTarget = useCallback(() => {
+    scrollTarget.current = null;
+    clearTimeout(settleTimer.current);
+  }, []);
+
+  useEffect(() => stopFollowingTarget, [stopFollowingTarget]);
 
   const goTo = useCallback(
     (i) => {
       const track = trackRef.current;
       const next = (i + count) % count;
       setIndex(next);
-      if (track) track.scrollTo({ left: next * track.clientWidth, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      if (!track) return;
+      scrollTarget.current = next;
+      clearTimeout(settleTimer.current);
+      settleTimer.current = setTimeout(stopFollowingTarget, SCROLL_SETTLE_MS);
+      // Nobody can see the track behind the full-screen viewer, so no animation there
+      track.scrollTo({ left: next * track.clientWidth, behavior: viewerOpen || prefersReducedMotion() ? "auto" : "smooth" });
     },
-    [count]
+    [count, viewerOpen, stopFollowingTarget]
   );
 
   // Swiping the track updates the current image
   const onScroll = () => {
     const track = trackRef.current;
     if (!track || !track.clientWidth) return;
+    if (scrollTarget.current != null) {
+      if (Math.abs(track.scrollLeft - scrollTarget.current * track.clientWidth) < 2) stopFollowingTarget();
+      return;
+    }
     const i = Math.round(track.scrollLeft / track.clientWidth);
     if (i !== index && i >= 0 && i < count) setIndex(i);
   };
@@ -76,6 +99,8 @@ export default function ProductGallery({ images, title, chip, badge, onShare, ca
           className="wc-carousel"
           onScroll={onScroll}
           onKeyDown={onKeyDown}
+          onPointerDown={stopFollowingTarget}
+          onWheel={stopFollowingTarget}
           tabIndex={count > 1 ? 0 : -1}
           role="region"
           aria-roledescription="carousel"
@@ -224,7 +249,8 @@ function ImageViewer({ images, title, index, onIndex, onClose }) {
         </button>
       </div>
 
-      <img src={images[index]} alt={`${title}, view ${index + 1} of ${count}`} className="wc-viewer-img" onError={fallbackToPlaceholder} />
+      {/* A new element per image, so the last one can't linger while the next loads */}
+      <img key={images[index]} src={images[index]} alt={`${title}, view ${index + 1} of ${count}`} className="wc-viewer-img" onError={fallbackToPlaceholder} />
 
       {count > 1 && (
         <>

@@ -32,7 +32,7 @@ async function runStartupPriceUpdate({ attempts = 3, delayMs = 60 * 1000 } = {})
   console.error("❌ Startup price update gave up; the next scheduled run will try again.");
 }
 
-cron.schedule("*/15 5-13 * * *", () => runPriceUpdate());
+cron.schedule("*/15 9-13 * * *", () => runPriceUpdate());
 
 // Refresh exchange rates every 6 hours (they're also fetched on demand)
 cron.schedule("10 */6 * * *", async () => {
@@ -40,5 +40,5 @@ cron.schedule("10 */6 * * *", async () => {
   console.log(`💱 Exchange rates from ${rates.source}${rates.stale ? " (stale)" : ""}`);
 });
 
-console.log("🕰️ Cron scheduled: Every 15 mins from 5 AM to 1 PM");
+console.log("🕰️ Cron scheduled: Every 15 mins from 9 AM to 1 PM");
 module.exports = { cron, runPriceUpdate, runStartupPriceUpdate };

@@ -33,6 +33,51 @@
   color: var(--wc-maroon);
   margin-bottom: 0.75rem;
 }
+/* Filters that fold away: a divided list of rows */
+.wc-filter-group {
+  border-top: 1px solid rgba(67, 10, 18, 0.12);
+  border-bottom: 1px solid rgba(67, 10, 18, 0.12);
+}
+.wc-filter-group > div + div {
+  border-top: 1px solid rgba(67, 10, 18, 0.12);
+}
+.wc-filter-group fieldset {
+  padding-bottom: 0.75rem;
+}
+.wc-filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.9rem;
+  text-align: left;
+}
+.wc-filter-toggle .wc-filter-title {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+.wc-filter-toggle:focus-visible {
+  outline: 2px solid var(--wc-maroon);
+  outline-offset: 2px;
+}
+.wc-filter-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--wc-ink-muted);
+}
+.wc-filter-chevron {
+  flex-shrink: 0;
+  color: var(--wc-maroon);
+  transition: transform 0.15s ease;
+}
+.wc-filter-chevron.wc-open {
+  transform: rotate(180deg);
+}
 .wc-field {
   width: 100%;
   height: 2.6rem;

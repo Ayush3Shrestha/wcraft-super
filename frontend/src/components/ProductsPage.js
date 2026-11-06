@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { breadcrumbJsonLd, useSeo } from "../lib/seo";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Search, X, List, LayoutGrid, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, X, List, LayoutGrid, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import ApiService from "../services/apiService";
 import { isCustomSilver } from "../lib/productDisplay";
 import LivePriceCard from "./shop/LivePriceCard";
@@ -24,6 +24,24 @@ const toNpr = (value, currency, round) => {
   const npr = convertToNpr(value, currency);
   return npr == null ? "" : String(Math.max(0, round(npr)));
 };
+
+// A filter whose options fold away. Closed, it still shows the current choice.
+function CollapsibleFilter({ id, title, summary, children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button type="button" className="wc-filter-toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls={id}>
+        <span className="wc-filter-title">{title}</span>
+        <span className="wc-filter-summary">{summary}</span>
+        <ChevronDown size={16} className={`wc-filter-chevron ${open ? "wc-open" : ""}`} aria-hidden="true" />
+      </button>
+      <fieldset id={id} className="mt-2" hidden={!open}>
+        <legend className="sr-only">{title}</legend>
+        <div className="space-y-1">{children}</div>
+      </fieldset>
+    </div>
+  );
+}
 
 const ProductsPage = () => {
   const { currency } = useCurrency();
@@ -335,9 +353,8 @@ const ProductsPage = () => {
                 </div>
               </form>
 
-              <fieldset>
-                <legend className="wc-filter-title">Categories</legend>
-                <div className="space-y-1">
+              <div className="wc-filter-group">
+                <CollapsibleFilter id="wc-filter-categories" title="Categories" summary={selectedCategory ? selectedCategoryName : "All"}>
                   {[{ _id: "", name: "All categories", productCount: totalAll || undefined }, ...categories].map((category) => {
                     const selected = selectedCategory === category._id;
                     return (
@@ -355,12 +372,9 @@ const ProductsPage = () => {
                       </label>
                     );
                   })}
-                </div>
-              </fieldset>
+                </CollapsibleFilter>
 
-              <fieldset>
-                <legend className="wc-filter-title">Height</legend>
-                <div className="space-y-1">
+                <CollapsibleFilter id="wc-filter-height" title="Height" summary={height ? HEIGHT_OPTIONS.find((o) => o.value === height)?.label : "Any"}>
                   {[{ value: "", label: "Any height" }, ...HEIGHT_OPTIONS].map((option) => {
                     const selected = height === option.value;
                     return (
@@ -372,8 +386,8 @@ const ProductsPage = () => {
                       </label>
                     );
                   })}
-                </div>
-              </fieldset>
+                </CollapsibleFilter>
+              </div>
 
               <form onSubmit={handleSearch}>
                 <fieldset>
