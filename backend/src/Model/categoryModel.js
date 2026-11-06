@@ -46,9 +46,10 @@ categorySchema.methods.getProductSchemaSpec = function () {
 };
 
 // Generate incremental numeric categoryId. Runs before validation, because
-// categoryId is required and validation happens before "save" hooks.
+// categoryId is required and validation happens before "save" hooks. Not only
+// for new categories: older ones were saved without an id and need one to save.
 categorySchema.pre("validate", async function (next) {
-  if (this.isNew && !this.categoryId) {
+  if (!this.categoryId) {
     try {
       const counter = await Counter.findByIdAndUpdate(
         "categoryId",
