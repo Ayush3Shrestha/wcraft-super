@@ -43,7 +43,6 @@ export default function BlogPostPage() {
       })
       .catch((err) => !cancelled && setError(err.status === 404 ? "This story doesn't exist or isn't published." : "Couldn't load this story."))
       .finally(() => !cancelled && setLoading(false));
-    window.scrollTo(0, 0);
     return () => {
       cancelled = true;
     };

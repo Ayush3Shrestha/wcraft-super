@@ -10,8 +10,8 @@ import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigationType } from 'react-router-dom';
+import { useEffect, useLayoutEffect } from 'react';
 import ApiService from './services/apiService';
 import ProductInputForm from './components/admin/ProductInputForm';
 import CategoryInputForm from './components/admin/CategoryInputForm';
@@ -39,6 +39,13 @@ import { useSeo } from './lib/seo';
 function AppWrapper() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const navigationType = useNavigationType();
+
+  // A new page starts at the top. Back and forward are left to the browser,
+  // which returns to where the visitor was on that page.
+  useLayoutEffect(() => {
+    if (navigationType !== 'POP' && !location.hash) window.scrollTo(0, 0);
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize session on app load
   useEffect(() => {

@@ -16,7 +16,7 @@ const blockSchema = new mongoose.Schema(
     type: { type: String, enum: BLOCK_TYPES, required: true },
     heading: { type: String, trim: true, maxlength: 150 }, // text blocks, optional
     text: { type: String, trim: true }, // text blocks
-    image: { type: String }, // image blocks: "/uploads/<file>"
+    image: { type: String }, // image blocks: "/uploads/blogs/<file>"
     caption: { type: String, trim: true }, // image blocks
   },
   { _id: false }
