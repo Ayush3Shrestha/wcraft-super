@@ -34,3 +34,6 @@ frontend/.DS_Store
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+
+# WhatsApp order bot login (it can send messages as the linked number)
+backend/.whatsapp-session/

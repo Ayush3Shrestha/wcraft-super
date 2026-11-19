@@ -463,7 +463,7 @@ class ApiService {
     });
   }
 
-  // Saves the cart as orders, empties it and returns { whatsappUrl, orderSummary }
+  // Saves the cart as orders, empties it and returns { orderSummary }
   static async placeOrder(sessionId) {
     return this.makeRequest(`/cart/${sessionId}/checkout`, {
       method: "POST",

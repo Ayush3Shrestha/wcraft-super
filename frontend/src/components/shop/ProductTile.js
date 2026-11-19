@@ -5,6 +5,7 @@ import { useCurrency } from "../../lib/currency";
 import {
   fallbackToPlaceholder,
   isCustomSilver,
+  isInStock,
   isPriceOnRequest,
   isSilver,
   priceLabel,
@@ -24,6 +25,8 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
   const url = `/product/${product._id}`;
   const custom = isCustomSilver(product);
   const row = layout === "row";
+  const soldOut = !isInStock(product);
+  const addLabel = soldOut ? `${product.title} is out of stock` : custom ? `Customize ${product.title}` : `Add ${product.title} to cart`;
   const detailed = row || light;
   // Silver is shown per tola (rate + making), unless the admin shows the total.
   // Custom pieces always are: their weight is chosen on the product page.
@@ -36,17 +39,16 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
         <Link to={url} tabIndex={-1} aria-hidden="true">
           <img src={productImage(product)} onError={fallbackToPlaceholder} alt={product.title} loading="lazy" decoding="async" />
         </Link>
-        {isSilver(product) && !onRequest && <span className="wc-tag">Live price</span>}
+        {soldOut ? (
+          <span className="wc-tag wc-tag-sold-out">Out of stock</span>
+        ) : (
+          isSilver(product) && !onRequest && <span className="wc-tag">Live price</span>
+        )}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           <Link to={url} className="wc-icon-btn" aria-label={`View ${product.title}`}>
             <Eye size={16} />
           </Link>
-          <button
-            type="button"
-            onClick={() => onAddToCart(product)}
-            className="wc-icon-btn"
-            aria-label={custom ? `Customize ${product.title}` : `Add ${product.title} to cart`}
-          >
+          <button type="button" onClick={() => onAddToCart(product)} disabled={soldOut} className="wc-icon-btn" aria-label={addLabel} title={soldOut ? "Out of stock" : undefined}>
             <ShoppingCart size={16} />
           </button>
         </div>
@@ -69,13 +71,8 @@ export default function ProductTile({ product, onAddToCart, crimson = false, lay
             )}
           </span>
           {detailed ? (
-            <button
-              type="button"
-              onClick={() => onAddToCart(product)}
-              className="wc-btn wc-btn-primary wc-btn-sm"
-              aria-label={custom ? `Customize ${product.title}` : `Add ${product.title} to cart`}
-            >
-              {custom ? "Customize" : "Add to cart"}
+            <button type="button" onClick={() => onAddToCart(product)} disabled={soldOut} className="wc-btn wc-btn-primary wc-btn-sm" aria-label={addLabel}>
+              {soldOut ? "Out of stock" : custom ? "Customize" : "Add to cart"}
             </button>
           ) : (
             <Link to={url} className="wc-product-link">

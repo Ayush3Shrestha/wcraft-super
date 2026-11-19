@@ -1,0 +1,3 @@
+{
+  "ignore": [".whatsapp-session/*", "uploads/*", "uploads-migration-*.json"]
+}

@@ -4,6 +4,7 @@ import { MapPin, Phone, Clock, Mail, ArrowUp, Navigation, MessageCircle } from "
 import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
 import ApiService from "../services/apiService";
 import { SHOP, whatsappLink } from "../lib/shopInfo";
+import WeChatButton from "./shop/WeChatContact";
 import logo from "../logo.jpg";
 import "../styles/layout.css";
 
@@ -95,6 +96,7 @@ export default function Footer() {
                   <MessageCircle size={14} /> WhatsApp
                 </a>
               )}
+              <WeChatButton className="wc-btn wc-btn-ghost wc-btn-sm" />
             </div>
 
             {social.length > 0 && (

@@ -1,0 +1,170 @@
+/* "Chat on WeChat" window, sized to fit without scrolling */
+.wc-wechat-dialog {
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  /* Centred on screen (Tailwind's reset removes the browser's own centring) */
+  margin: auto;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--wc-paper, #fffdf8);
+  color: var(--wc-ink, #2a1a14);
+  box-shadow: 0 24px 60px rgba(30, 6, 10, 0.35);
+  /* Only very short screens need to scroll, and then without a visible bar */
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.wc-wechat-dialog::-webkit-scrollbar {
+  display: none;
+}
+.wc-wechat-dialog::backdrop {
+  background-color: rgba(20, 4, 8, 0.55);
+}
+/* With a QR code (computers): code on the left, steps on the right */
+@media (min-width: 640px) {
+  .wc-wechat-dialog.wc-with-qr {
+    width: min(40rem, calc(100vw - 2rem));
+  }
+  .wc-with-qr .wc-wechat-body {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+}
+.wc-wechat-box {
+  padding: 1.25rem 1.5rem 1.4rem;
+}
+.wc-wechat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.wc-wechat-head h2 {
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+.wc-wechat-close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  color: var(--wc-maroon);
+}
+.wc-wechat-close:hover {
+  background-color: rgba(67, 10, 18, 0.08);
+}
+.wc-wechat-or {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wc-maroon);
+  margin-bottom: 0.5rem;
+}
+.wc-wechat-steps {
+  list-style: decimal;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.wc-wechat-steps li + li {
+  margin-top: 0.45rem;
+}
+.wc-wechat-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  background-color: rgba(7, 193, 96, 0.1);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+.wc-wechat-message {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px dashed rgba(67, 10, 18, 0.25);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--wc-ink-muted);
+}
+/* A preview only: long messages are cut after three lines */
+.wc-wechat-message p {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.wc-wechat-message .wc-wechat-copy {
+  flex-shrink: 0;
+}
+.wc-wechat-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #062b14;
+  background-color: #07c160;
+}
+.wc-wechat-copy:hover {
+  background-color: #06ad56;
+}
+.wc-wechat-copy:focus-visible,
+.wc-wechat-close:focus-visible {
+  outline: 2px solid var(--wc-maroon);
+  outline-offset: 2px;
+}
+.wc-wechat-qr {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--wc-ink-muted);
+}
+/* WeChat's saved code is a tall card (name, code, caption): keep its shape */
+.wc-wechat-qr img {
+  width: 11rem;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 0.35rem;
+  border-radius: 6px;
+  border: 1px solid rgba(67, 10, 18, 0.1);
+}
+/* Stacked (narrow window or inside WeChat): code above the steps */
+@media (max-width: 639px) {
+  .wc-wechat-qr {
+    margin-bottom: 1rem;
+  }
+}
+.wc-wechat-note {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  text-align: center;
+  color: var(--wc-ink-muted);
+}
+.wc-wechat-note a {
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--wc-crimson);
+}
+.wc-wechat-note:empty {
+  display: none;
+}

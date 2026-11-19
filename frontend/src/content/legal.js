@@ -15,7 +15,7 @@ export const POLICY = {
   refundWorkingDays: 7, // working days to pay a refund once approved
 };
 
-const contactLine = [SHOP.phone && `phone ${SHOP.phone}`, SHOP.whatsapp && "WhatsApp", SHOP.email && `email ${SHOP.email}`]
+const contactLine = [SHOP.phone && `phone ${SHOP.phone}`, SHOP.whatsapp && "WhatsApp", SHOP.wechat.id && "WeChat", SHOP.email && `email ${SHOP.email}`]
   .filter(Boolean)
   .join(", ");
 
@@ -78,6 +78,7 @@ export const PRIVACY = {
           list: [
             "delivery or courier partners receive your name, phone number and address to deliver your order;",
             "our email provider sends order confirmations on our behalf;",
+            "WhatsApp carries new orders (including your name, phone number and address) to our own WhatsApp, so we can respond quickly;",
             "if you message us on WhatsApp or another chat app, that service handles the conversation under its own privacy policy;",
             "authorities, if the law requires it.",
           ],

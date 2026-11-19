@@ -18,7 +18,7 @@ import {
   StickyNote,
 } from "lucide-react";
 import ApiService from "../services/apiService";
-import { PRICE_ON_REQUEST, fallbackToPlaceholder, isCustomSilver, isSilver, productImage, variantLabel } from "../lib/productDisplay";
+import { LOW_STOCK, PRICE_ON_REQUEST, fallbackToPlaceholder, isCustomSilver, isSilver, productImage, stockLeft, variantLabel } from "../lib/productDisplay";
 import { CustomPieceFields, estimateCustomPrice, specToValues, validateCustomPiece, valuesToSpec } from "./CustomPieceForm";
 import CheckoutSteps from "./shop/CheckoutSteps";
 import { CurrencyDisclaimer, NprEquivalent } from "./shop/CurrencyNote";
@@ -62,6 +62,10 @@ const CartPage = () => {
     const msgs = [];
     if (res.priceChanges?.length) msgs.push("Some prices in your cart were updated.");
     if (res.removedItems?.length) msgs.push(`Removed because no longer available: ${res.removedItems.join(", ")}.`);
+    if (res.stockChanges?.length)
+      msgs.push(
+        `Fewer left than you had in your cart, so we lowered the quantity: ${res.stockChanges.map((c) => `${c.title} (now ${c.quantity})`).join(", ")}.`
+      );
     if (msgs.length) setNotices(msgs);
     window.dispatchEvent(new Event("storage")); // Update navbar cart count
   };
@@ -416,10 +420,19 @@ const CartPage = () => {
                             <Minus size={15} />
                           </button>
                           <span aria-live="polite">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item, item.quantity + 1)} disabled={busy} aria-label={`Increase quantity of ${p.title}`}>
+                          <button
+                            onClick={() => updateQuantity(item, item.quantity + 1)}
+                            disabled={busy || item.quantity >= stockLeft(p)}
+                            aria-label={`Increase quantity of ${p.title}`}
+                          >
                             <Plus size={15} />
                           </button>
                         </div>
+                        {stockLeft(p) <= LOW_STOCK && (
+                          <span className="text-xs self-center" style={{ color: "var(--wc-ink-muted)" }}>
+                            Only {stockLeft(p)} left
+                          </span>
+                        )}
 
                         <div className="text-right ml-auto">
                           {item.priceSnapshot == null ? (
