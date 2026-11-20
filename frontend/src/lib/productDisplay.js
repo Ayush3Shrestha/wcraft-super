@@ -75,6 +75,12 @@ export const showsTotal = (p) => !isSilver(p) || p?.showTotalPrice === true;
 // Custom pieces are made when ordered, so they're always available
 export const isInStock = (p) => isCustomSilver(p) || Number(p?.stockQuantity) > 0;
 
+// How many can be ordered: Infinity for made-to-order pieces
+export const stockLeft = (p) => (isCustomSilver(p) ? Infinity : Math.max(0, Number(p?.stockQuantity) || 0));
+
+// Stock is low enough to tell the customer how many are left
+export const LOW_STOCK = 3;
+
 const UNIT_SHORT = { inch: "in", cm: "cm" };
 const trimNumber = (n) => String(Math.round(n * 10) / 10);
 

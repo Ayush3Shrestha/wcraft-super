@@ -1,5 +1,5 @@
 /**
- * Messaging Service for WhatsApp and Telegram integration
+ * WhatsApp link helpers
  * Handles sending order notifications to the admin
  */
 

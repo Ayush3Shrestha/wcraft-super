@@ -4,6 +4,7 @@ const { calculatePrice, validateCustomSpecification } = require("../Services/pri
 const jwt = require("jsonwebtoken");
 const { sendWhatsAppOrderNotification } = require("../Services/messagingService");
 const { sendOrderEmails } = require("../Services/emailService");
+const { tracksStock, takeStock, returnStock, stockLeft, shortageMessage, syncOrderStock, StockError } = require("../Services/stockService");
 
 // True when the request carries a valid admin token (orders entered from the
 // admin panel), so the shop isn't emailed about its own orders
@@ -52,9 +53,20 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Invalid custom specification", errors });
     }
 
+    const qty = Number(quantity);
+    if (!Number.isInteger(qty) || qty < 1) {
+      return res.status(400).json({ message: "Quantity must be a whole number of at least 1" });
+    }
+
     const { price, silverRate } = await calculatePrice(product, { customSpecification: specification });
     const silverPriceSnapshot = silverRate;
-    const totalPrice = price != null ? price * quantity : null;
+    const totalPrice = price != null ? price * qty : null;
+
+    // Reserve the stock first; custom pieces are made to order
+    const tracked = tracksStock(product);
+    if (tracked && !(await takeStock(product, qty))) {
+      return res.status(409).json({ message: shortageMessage(product.title, await stockLeft(product)) });
+    }
 
     const newOrder = new Order({
       customerName,
@@ -62,16 +74,23 @@ exports.createOrder = async (req, res) => {
       customerEmail,
       customerAddress,
       product: productId,
-      quantity,
+      quantity: qty,
       notes,
       customization,
       customSpecification: specification,
       silverPriceSnapshot,
       totalPrice,
-      status: 'pending'
+      status: 'pending',
+      stockTracked: tracked,
+      stockReserved: tracked ? qty : 0
     });
 
-    await newOrder.save();
+    try {
+      await newOrder.save();
+    } catch (err) {
+      if (tracked) await returnStock(product, qty);
+      throw err;
+    }
     
     // Populate the saved order for response
     const populatedOrder = await Order.findById(newOrder._id).populate('product');
@@ -223,10 +242,22 @@ exports.updateOrder = async (req, res) => {
       order.totalPrice = total;
     }
 
-    await order.save();
+    // Check everything else first, then move stock to match the new status and
+    // quantity (a cancelled order gives its stock back), then save
+    await order.validate();
+    const undoStock = await syncOrderStock(order, order.product?.title);
+    try {
+      await order.save();
+    } catch (err) {
+      await undoStock();
+      throw err;
+    }
     await order.populate({ path: "product", populate: { path: "category", select: "name materialType" } });
     res.status(200).json({ message: "Order updated", order });
   } catch (error) {
+    if (error instanceof StockError) {
+      return res.status(409).json({ message: error.message, ...error.details });
+    }
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: error.message });
     }
@@ -240,6 +271,10 @@ exports.deleteOrder = async (req, res) => {
     const order = await Order.findByIdAndDelete(req.params.orderId);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
+    // A deleted order that wasn't completed never sold its piece: give it back
+    if (order.status !== "completed" && order.stockReserved > 0) {
+      await returnStock(order.product, order.stockReserved);
+    }
     res.status(200).json({ message: "Order deleted" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting order", error: error.message });

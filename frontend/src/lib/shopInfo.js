@@ -7,6 +7,12 @@ const digits = (value) => value.replace(/[^\d]/g, "");
 
 const phone = env("REACT_APP_SHOP_PHONE", "9981267123");
 const whatsapp = digits(env("REACT_APP_WHATSAPP_PHONE") || env("REACT_APP_WHATSAPP_NUMBER"));
+// WeChat ID people search for: a WeChat ID, or a phone number with country code
+const wechatId = env("REACT_APP_WECHAT_ID");
+// Numbers read better as "+977 9714652103"
+const wechatDisplay = /^\+?977\d{10}$/.test(wechatId) ? `+977 ${digits(wechatId).slice(3)}` : wechatId;
+// Optional QR code from WeChat (Me > QR code): an image URL, or a file in public/
+const wechatQr = env("REACT_APP_WECHAT_QR");
 
 export const SHOP = {
   name: "Welcome Craft",
@@ -16,6 +22,11 @@ export const SHOP = {
   phoneHref: phone ? `tel:${digits(phone)}` : "",
   email: env("REACT_APP_SHOP_EMAIL"),
   whatsapp,
+  wechat: {
+    id: wechatId,
+    display: wechatDisplay,
+    qr: wechatQr && !/^https?:/.test(wechatQr) ? `${process.env.PUBLIC_URL}/${wechatQr.replace(/^\//, "")}` : wechatQr,
+  },
   mapsUrl:
     "https://www.google.com/maps/place/Welcome+Handicraft+Center/@27.6694709,85.3267291,17z/data=!4m6!3m5!1s0x39eb190024179ed7:0x86947efc747405ad!8m2!3d27.669319!4d85.327684!16s%2Fg%2F11y674bk3_",
   mapsEmbedUrl:

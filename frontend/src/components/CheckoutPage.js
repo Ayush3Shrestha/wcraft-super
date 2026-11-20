@@ -7,7 +7,6 @@ import {
   Phone,
   Mail,
   MapPin,
-  MessageCircle,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -59,6 +58,8 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  // The last error was about stock running out, so point to the cart
+  const [stockProblem, setStockProblem] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [placedOrder, setPlacedOrder] = useState(null);
   const [customerInfo, setCustomerInfo] = useState(EMPTY_INFO);
@@ -123,6 +124,14 @@ const CheckoutPage = () => {
       window.scrollTo({ top: 0 });
     } catch (err) {
       setError(err.message || "Failed to place your order. Please try again.");
+      setStockProblem(err.status === 409);
+      // Stock changed while checking out: show the updated cart
+      if (err.status === 409) {
+        ApiService.getCart(sessionId)
+          .then(({ cart: data }) => setCart(data))
+          .catch(() => {});
+        window.dispatchEvent(new Event("storage"));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -178,18 +187,11 @@ const CheckoutPage = () => {
                 ))}
               </p>
             )}
-            <div className="space-y-3">
-              {placedOrder.whatsappUrl && (
-                <a href={placedOrder.whatsappUrl} target="_blank" rel="noreferrer" className="wc-btn wc-btn-primary w-full">
-                  <MessageCircle size={15} />
-                  Send order details on WhatsApp
-                </a>
-              )}
-              <Link to="/products" className={`wc-btn w-full ${placedOrder.whatsappUrl ? "wc-btn-soft" : "wc-btn-primary"}`}>
-                <Package size={15} />
-                Continue shopping
-              </Link>
-            </div>
+            {/* The shop is notified automatically; nothing for the customer to send */}
+            <Link to="/products" className="wc-btn wc-btn-primary w-full">
+              <Package size={15} />
+              Continue shopping
+            </Link>
           </div>
         </div>
       </div>
@@ -251,7 +253,17 @@ const CheckoutPage = () => {
         {error && (
           <div className="wc-alert wc-alert-error mb-6" role="alert">
             <AlertCircle size={18} className="flex-shrink-0" />
-            <p className="flex-1">{error}</p>
+            <p className="flex-1">
+              {error}
+              {stockProblem && (
+                <>
+                  {" "}
+                  <Link to="/cart" className="font-semibold underline">
+                    Review your cart
+                  </Link>
+                </>
+              )}
+            </p>
             <button type="button" onClick={() => setError(null)} className="text-xs underline">
               Dismiss
             </button>

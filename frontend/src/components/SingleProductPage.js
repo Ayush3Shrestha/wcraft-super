@@ -39,6 +39,8 @@ import {
   formatLength,
   isCustomSilver,
   isInStock,
+  LOW_STOCK,
+  stockLeft,
   isPriceOnRequest,
   isSilver,
   label,
@@ -50,6 +52,7 @@ import {
 } from "../lib/productDisplay";
 import ProductTile from "./shop/ProductTile";
 import ProductGallery from "./shop/ProductGallery";
+import WeChatButton from "./shop/WeChatContact";
 import { describeChange } from "./shop/LivePriceCard";
 import { CurrencyDisclaimer, NprEquivalent } from "./shop/CurrencyNote";
 import { useCurrency } from "../lib/currency";
@@ -421,6 +424,9 @@ const SingleProductPage = () => {
   const specs = specList(product);
   const height = productHeight(product);
   const inStock = isInStock(product);
+  // Most that can be ordered; the customer is told when only a few are left
+  const maxQuantity = stockLeft(product);
+  const fewLeft = inStock && maxQuantity <= LOW_STOCK;
   // Custom pieces always show their total, once a weight is entered
   const onRequest = isPriceOnRequest(product);
   const showTotal = custom || showsTotal(product);
@@ -491,7 +497,7 @@ const SingleProductPage = () => {
               <div className="flex flex-wrap items-center gap-2 mt-3">
                 <p className={`wc-stock ${inStock ? "wc-in-stock" : "wc-out-of-stock"}`}>
                   <span aria-hidden="true" />
-                  {inStock ? "In stock" : "Out of stock"}
+                  {!inStock ? "Out of stock" : fewLeft ? `In stock · only ${maxQuantity} left` : "In stock"}
                 </p>
                 {metalRate && <MetalRate metal={productType} rate={metalRate} formatMoney={formatMoney} />}
               </div>
@@ -622,23 +628,45 @@ const SingleProductPage = () => {
 
             {/* Quantity + actions */}
             <div className="space-y-3">
-              <div className="flex items-center gap-4">
-                <span className="wc-panel-title">Quantity</span>
-                <div className="wc-stepper">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} aria-label="Decrease quantity">
-                    <Minus size={16} />
-                  </button>
-                  <span aria-live="polite">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">
-                    <Plus size={16} />
-                  </button>
+              {inStock && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <span className="wc-panel-title">Quantity</span>
+                  <div className="wc-stepper">
+                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} aria-label="Decrease quantity">
+                      <Minus size={16} />
+                    </button>
+                    <span aria-live="polite">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
+                      disabled={quantity >= maxQuantity}
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  {fewLeft && quantity >= maxQuantity && (
+                    <span className="text-xs" style={{ color: "var(--wc-ink-muted)" }}>
+                      That's all we have
+                    </span>
+                  )}
                 </div>
-              </div>
+              )}
 
-              <button onClick={handleAddToCart} disabled={addingToCart} className="wc-btn wc-btn-primary w-full" style={{ padding: "1rem 1.5rem" }}>
-                <ShoppingBag size={16} />
-                {addingToCart ? "Adding..." : `Add to cart${showTotal && unitPrice != null ? ` · ${formatMoney(unitPrice * quantity)}` : ""}`}
-              </button>
+              {inStock ? (
+                <button onClick={handleAddToCart} disabled={addingToCart} className="wc-btn wc-btn-primary w-full" style={{ padding: "1rem 1.5rem" }}>
+                  <ShoppingBag size={16} />
+                  {addingToCart ? "Adding..." : `Add to cart${showTotal && unitPrice != null ? ` · ${formatMoney(unitPrice * quantity)}` : ""}`}
+                </button>
+              ) : (
+                <>
+                  <button type="button" disabled className="wc-btn wc-btn-primary w-full" style={{ padding: "1rem 1.5rem" }}>
+                    Out of stock
+                  </button>
+                  <p className="text-xs text-center" style={{ color: "var(--wc-ink-muted)" }}>
+                    Ask us on WhatsApp or WeChat about a similar piece or when it's back.
+                  </p>
+                </>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 {WHATSAPP_PHONE ? (
                   <a
@@ -659,10 +687,20 @@ const SingleProductPage = () => {
                     <span className="hidden sm:inline">Chat on</span> WhatsApp
                   </button>
                 )}
-                <button type="button" onClick={() => setChatNote("WeChat")} className="wc-btn wc-btn-wechat" aria-label="Chat on WeChat">
-                  <MessagesSquare size={15} />
-                  <span className="hidden sm:inline">Chat on</span> WeChat
-                </button>
+                {SHOP.wechat.id ? (
+                  <WeChatButton
+                    message={`Hi! I'm interested in "${product.title}" (${window.location.href}). Could you share more details?`}
+                    aria-label="Chat on WeChat"
+                  >
+                    <MessagesSquare size={15} />
+                    <span className="hidden sm:inline">Chat on</span> WeChat
+                  </WeChatButton>
+                ) : (
+                  <button type="button" onClick={() => setChatNote("WeChat")} className="wc-btn wc-btn-wechat" aria-label="Chat on WeChat">
+                    <MessagesSquare size={15} />
+                    <span className="hidden sm:inline">Chat on</span> WeChat
+                  </button>
+                )}
               </div>
               {chatNote && (
                 <p className="text-xs text-center" role="status" style={{ color: "var(--wc-ink-muted)" }}>
@@ -679,10 +717,12 @@ const SingleProductPage = () => {
                   ) : null}
                 </p>
               )}
-              <button onClick={handleBuyNow} disabled={addingToCart} className="wc-btn wc-btn-soft w-full">
-                <ArrowRight size={14} />
-                Buy now
-              </button>
+              {inStock && (
+                <button onClick={handleBuyNow} disabled={addingToCart} className="wc-btn wc-btn-soft w-full">
+                  <ArrowRight size={14} />
+                  Buy now
+                </button>
+              )}
             </div>
 
             {/* Guarantee */}

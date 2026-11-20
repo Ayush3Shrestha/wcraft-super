@@ -3,6 +3,7 @@ import { storeJsonLd, useSeo } from "../lib/seo";
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, MessageCircle, Send, CheckCircle, Navigation, Plus, Tag, User } from "lucide-react";
 import { SHOP, whatsappLink } from "../lib/shopInfo";
+import WeChatButton from "./shop/WeChatContact";
 import "../styles/home.css";
 import "../styles/info.css";
 
@@ -30,7 +31,6 @@ const FAQS = [
     q: "How do I pay?",
     a: "There is no online payment yet. After you place an order, our team contacts you to confirm availability, the final price, payment and delivery.",
     soon: [
-      "We're working on chat through WhatsApp and WeChat, so it's easier to talk to us and work together on your order.",
       "We also plan to add online payment through connectIPS or a similar payment platform in the future.",
     ],
   },
@@ -154,6 +154,16 @@ const ContactPage = () => {
                   +{SHOP.whatsapp}
                 </a>
                 <p>Send us photos or questions.</p>
+              </InfoCard>
+            )}
+
+            {SHOP.wechat.id && (
+              <InfoCard Icon={MessageCircle} title="WeChat">
+                <p className="font-semibold" style={{ color: "var(--wc-ink)" }}>
+                  {SHOP.wechat.display}
+                </p>
+                <p>Search for this number in WeChat to add us.</p>
+                <WeChatButton className="wc-info-link pt-1">How to add us</WeChatButton>
               </InfoCard>
             )}
 

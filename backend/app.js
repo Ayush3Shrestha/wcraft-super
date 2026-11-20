@@ -81,6 +81,8 @@ const server = app.listen(port, () => {
   console.log(`Server started on port ${port}`);
   // Log whether order emails are set up correctly
   require("./src/Services/emailService").verifyEmailSetup();
+  // WhatsApp order alerts to the shop (does nothing unless enabled in .env)
+  require("./src/Services/whatsappBot").startWhatsAppBot();
 });
 
 server.on("error", (err) => {

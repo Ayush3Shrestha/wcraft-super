@@ -38,6 +38,12 @@ const orderSchema = new mongoose.Schema({
   customization: { type: String }, // Free-text notes
   customSpecification: customSpecificationSchema, // For custom silver products
 
+  // Stock keeping (see Services/stockService.js). stockTracked is set on
+  // orders placed since stock keeping began; stockReserved is how many of the
+  // product this order currently holds (0 once cancelled).
+  stockTracked: { type: Boolean, default: false },
+  stockReserved: { type: Number, default: 0, min: 0 },
+
   // Whether the order emails went out: "sent", "skipped: ..." or "failed: ..."
   emailStatus: {
     admin: String,

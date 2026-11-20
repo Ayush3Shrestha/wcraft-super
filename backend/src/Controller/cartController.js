@@ -9,13 +9,20 @@ const {
 } = require("../Services/pricingService");
 const { generateCustomerOrderUrl } = require("../Services/messagingService");
 const { emailEnabled, sendOrderEmails } = require("../Services/emailService");
+const { sendWhatsAppAlert } = require("../Services/whatsappBot");
+const { tracksStock, reserveAll, releaseAll, shortageMessage, StockError } = require("../Services/stockService");
 
-// Re-price every item at today's silver rate and drop items whose product
-// was deleted or hidden. Returns what changed so the page can tell the customer.
+// How many of a product are left to order (Infinity for made-to-order pieces)
+const availableStock = (product) => (tracksStock(product) ? Math.max(0, Number(product.stockQuantity) || 0) : Infinity);
+
+// Re-price every item at today's silver rate, drop items whose product was
+// deleted, hidden or sold out, and lower quantities to what's left in stock.
+// Returns what changed so the page can tell the customer.
 async function refreshCartPrices(cart) {
   const silverRate = await getLatestSilverRate();
   const priceChanges = [];
   const removedItems = [];
+  const stockChanges = [];
   let dirty = false;
 
   for (const item of [...cart.items]) {
@@ -25,6 +32,18 @@ async function refreshCartPrices(cart) {
       cart.items.pull(item._id);
       dirty = true;
       continue;
+    }
+    const available = availableStock(product);
+    if (available === 0) {
+      removedItems.push(`${product.title} (sold out)`);
+      cart.items.pull(item._id);
+      dirty = true;
+      continue;
+    }
+    if (item.quantity > available) {
+      stockChanges.push({ itemId: item._id, title: product.title, previousQuantity: item.quantity, quantity: available });
+      item.quantity = available;
+      dirty = true;
     }
     const { price, silverRate: rate, pricingType } = await calculatePrice(product, {
       silverRate: silverRate ?? undefined,
@@ -49,7 +68,7 @@ async function refreshCartPrices(cart) {
     cart.recalculateTotals();
     await cart.save();
   }
-  return { priceChanges, removedItems };
+  return { priceChanges, removedItems, stockChanges };
 }
 
 // Get cart by session ID
@@ -119,6 +138,10 @@ addToCart = async (req, res) => {
       });
     }
 
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ message: "Quantity must be a whole number of at least 1" });
+    }
+
     // Find or create cart
     const cart = await Cart.findOrCreateBySession(sessionId);
 
@@ -130,6 +153,20 @@ addToCart = async (req, res) => {
             (item.product._id || item.product).toString() ===
             productId.toString()
         );
+
+    // Can't ask for more than the shop has, counting what's already in the cart
+    const inCart = existingItemIndex >= 0 ? cart.items[existingItemIndex].quantity : 0;
+    const available = availableStock(product);
+    if (inCart + quantity > available) {
+      return res.status(409).json({
+        message:
+          available === 0
+            ? shortageMessage(product.title, 0)
+            : `${shortageMessage(product.title, available)}${inCart ? ` You already have ${inCart} in your cart.` : ""}`,
+        available,
+        inCart,
+      });
+    }
 
     if (existingItemIndex >= 0) {
       // Update existing item quantity
@@ -209,12 +246,23 @@ updateCartItem = async (req, res) => {
       return res.status(404).json({ message: "Item not found in cart" });
     }
 
+    if (quantity !== undefined && quantity !== 0 && !Number.isInteger(quantity)) {
+      return res.status(400).json({ message: "Quantity must be a whole number" });
+    }
+
     if (quantity === 0) {
       // Remove item if quantity is 0
       cart.items.splice(itemIndex, 1);
     } else {
-      // Update item
-      if (quantity) cart.items[itemIndex].quantity = quantity;
+      // Update item, up to what's in stock
+      if (quantity) {
+        const product = await Product.findById(cart.items[itemIndex].product);
+        const available = availableStock(product);
+        if (quantity > available) {
+          return res.status(409).json({ message: shortageMessage(product?.title || "This product", available), available });
+        }
+        cart.items[itemIndex].quantity = quantity;
+      }
       if (customization !== undefined)
         cart.items[itemIndex].customization = customization;
 
@@ -412,14 +460,25 @@ updateCustomerInfo = async (req, res) => {
 };
 
 // Place the order: saves one Order per cart item (so they show up in the
-// admin panel), empties the cart and returns a WhatsApp link for the shop.
+// admin panel), empties the cart, and alerts the shop by email and WhatsApp.
 generateCheckoutUrl = async (req, res) => {
   try {
     const { sessionId } = req.params;
 
     const cart = await Cart.findOrCreateBySession(sessionId);
-    const { removedItems } = await refreshCartPrices(cart);
+    const { removedItems, stockChanges } = await refreshCartPrices(cart);
 
+    // Stock ran out since the customer last looked: let them see the new cart
+    // first (checked before "empty", so a cart that sold out says why)
+    if (removedItems.length || stockChanges.length) {
+      return res.status(409).json({
+        message: cart.items.length
+          ? "Some pieces sold out or have fewer left, so your cart was updated. Please check it and place your order again."
+          : `Sorry, your cart is now empty. No longer available: ${removedItems.join(", ")}.`,
+        removedItems,
+        stockChanges,
+      });
+    }
     if (cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty", removedItems });
     }
@@ -427,22 +486,45 @@ generateCheckoutUrl = async (req, res) => {
       return res.status(400).json({ message: "Customer name and phone are required" });
     }
 
-    const orders = await Order.insertMany(
-      cart.items.map((item) => ({
-        customerName: cart.customerName,
-        customerPhone: cart.customerPhone,
-        customerEmail: cart.customerEmail,
-        customerAddress: cart.customerAddress,
-        product: item.product._id,
-        quantity: item.quantity,
-        silverPriceSnapshot: item.silverPriceSnapshot,
-        totalPrice: item.priceSnapshot != null ? item.priceSnapshot * item.quantity : null,
-        notes: cart.orderNotes,
-        customization: item.customization,
-        customSpecification: item.customSpecification,
-        status: "pending",
-      }))
-    );
+    // Reserve the stock (all items or none) before saving the orders
+    const stockLines = cart.items
+      .filter((item) => tracksStock(item.product))
+      .map((item) => ({ product: item.product._id, quantity: item.quantity, title: item.product.title }));
+    try {
+      await reserveAll(stockLines);
+    } catch (err) {
+      if (err instanceof StockError) return res.status(409).json({ message: err.message, ...err.details });
+      throw err;
+    }
+
+    let orders;
+    try {
+      orders = await Order.insertMany(
+        cart.items.map((item) => {
+          const tracked = tracksStock(item.product);
+          return {
+            customerName: cart.customerName,
+            customerPhone: cart.customerPhone,
+            customerEmail: cart.customerEmail,
+            customerAddress: cart.customerAddress,
+            product: item.product._id,
+            quantity: item.quantity,
+            silverPriceSnapshot: item.silverPriceSnapshot,
+            totalPrice: item.priceSnapshot != null ? item.priceSnapshot * item.quantity : null,
+            notes: cart.orderNotes,
+            customization: item.customization,
+            customSpecification: item.customSpecification,
+            status: "pending",
+            stockTracked: tracked,
+            stockReserved: tracked ? item.quantity : 0,
+          };
+        })
+      );
+    } catch (err) {
+      // The orders weren't saved, so give the stock back
+      await releaseAll(stockLines);
+      throw err;
+    }
 
     let message = `🛒 *NEW ORDER FROM WELCOME-CRAFT* 🛒\n\n`;
     message += `👤 *Customer Details:*\n`;
@@ -494,12 +576,7 @@ generateCheckoutUrl = async (req, res) => {
 
     message += `\n🧾 Order reference: ${orders.map((o) => String(o._id).slice(-6).toUpperCase()).join(", ")}\n`;
     message += `⏰ Order Time: ${new Date().toLocaleString()}\n`;
-    message += `\nPlease confirm this order and provide payment details.\n\nThank you! 🙏`;
-
-    const adminPhone = (process.env.WHATSAPP_PHONE || "").replace(/[^\d]/g, "");
-    const whatsappUrl = adminPhone
-      ? `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`
-      : null;
+    message += `\nContact the customer to confirm availability, price and delivery.`;
 
     const orderSummary = {
       totalItems: cart.totalItems,
@@ -520,7 +597,6 @@ generateCheckoutUrl = async (req, res) => {
 
     res.status(200).json({
       message: "Order placed successfully",
-      whatsappUrl,
       orderSummary,
       removedItems,
       // Lets the confirmation page mention the email copy
@@ -530,6 +606,7 @@ generateCheckoutUrl = async (req, res) => {
     // Email the shop and the customer after responding, so mail problems
     // never hold up or fail the order. Errors are logged, not thrown.
     sendOrderEmails(orders, { products: orderedProducts });
+    sendWhatsAppAlert(message);
   } catch (error) {
     console.error("Checkout error:", error);
     res

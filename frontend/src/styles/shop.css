@@ -289,6 +289,10 @@
   background-color: var(--wc-maroon);
   color: var(--wc-marigold);
 }
+.wc-tag.wc-tag-sold-out {
+  background-color: rgba(30, 20, 18, 0.82);
+  color: #fff;
+}
 
 
 /* Icon buttons */
@@ -312,6 +316,13 @@
 .wc-icon-btn:focus-visible {
   outline: 2px solid var(--wc-marigold);
   outline-offset: 2px;
+}
+.wc-icon-btn:disabled,
+.wc-icon-btn:disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background-color: rgba(240, 232, 220, 0.92);
+  color: var(--wc-maroon);
 }
 
 
